@@ -1,0 +1,131 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Editor (Debug x64)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/x64/Debug/Editor.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/x64/Debug",
+      "preLaunchTask": "Build: Editor (Debug x64)",
+      "stopOnEntry": false,
+      "env": {
+        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+      },
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Game (Debug x64)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/x64/Debug/Game.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/x64/Debug",
+      "preLaunchTask": "Build: Game (Debug x64)",
+      "stopOnEntry": false,
+      "env": {
+        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+      },
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "ShaderTool (Debug x64)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/x64/Debug/ShaderTool.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/x64/Debug",
+      "preLaunchTask": "Build: ShaderTool (Debug x64)",
+      "stopOnEntry": false,
+      "env": {
+        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+      },
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: Vulkan (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: Vulkan",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: DirectX11 (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: DirectX11",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: DirectX12 (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: DirectX12",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: Audio (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: Audio",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: Core (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: Core",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: Interface (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: Interface",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    },
+    {
+      "name": "Attach: Qt (Debug x64)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}",
+      "preLaunchTask": "Build: Qt",
+      "initCommands": [
+        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Editor + Vulkan Plugin",
+      "configurations": ["Editor (Debug x64)"],
+      "preLaunchTask": "Build: Editor (Debug x64)",
+      "stopAll": true
+    }
+  ]
+}

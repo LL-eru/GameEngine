@@ -1,0 +1,36 @@
+{
+  "files.associations": {
+    "*.hxx": "cpp",
+    "*.cxx": "cpp"
+  },
+  "files.encoding": "utf8bom",
+  "terminal.integrated.env.windows": {
+    "PYTHONIOENCODING": "utf-8"
+  },
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (UTF-8)": {
+      "source": "PowerShell",
+      "args": ["-NoExit", "-Command", "chcp 65001 > $null"]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell (UTF-8)",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/Interface",
+    "${workspaceFolder}/Editor",
+    "${workspaceFolder}/Vulkan",
+    "C:/GLFW/glfw-3.4/include",
+    "C:/VulkanSDK/1.4.341.1/Include",
+    "${env:VulkanSDK14}/Include"
+  ],
+  "C_Cpp.default.forcedInclude": [
+    "${workspaceFolder}/Editor/absuse.hxx"
+  ],
+  "C_Cpp.default.cppStandard": "c++20",
+  "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}",
+    "--query-driver=C:/Program Files/Microsoft Visual Studio/**/cl.exe"
+  ]
+}

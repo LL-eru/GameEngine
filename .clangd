@@ -1,0 +1,23 @@
+CompileFlags:
+  Add:
+    - -std=c++20
+    - -D_DEBUG
+    - -D_CONSOLE
+    - -IC:/GLFW/glfw-3.4/include
+    - -IC:/MyPrograms/GameEngine/Interface
+    - -IC:/MyPrograms/GameEngine/Editor
+    - -IC:/MyPrograms/GameEngine/Vulkan
+    - -IC:/VulkanSDK/1.4.341.1/Include
+    - -include
+    - C:/MyPrograms/GameEngine/Editor/absuse.hxx
+    - /utf-8
+  Remove:
+    - -W*
+    - -w
+
+---
+If:
+  PathMatch: Vulkan/.*
+CompileFlags:
+  Add:
+    - -D_WINDOWS

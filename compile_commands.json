@@ -1,0 +1,42 @@
+[
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/main.cpp",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c main.cpp"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/Glfw.cxx",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c Glfw.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/Logger.cxx",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c Logger.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/Allocator.cxx",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c Allocator.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/Debugger.cxx",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c Debugger.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Editor",
+    "file": "C:/MyPrograms/GameEngine/Editor/Plugin.cxx",
+    "command": "cl.exe /utf-8 /FIabsuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /std:c++20 /D_DEBUG /D_CONSOLE /c Plugin.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Vulkan",
+    "file": "C:/MyPrograms/GameEngine/Vulkan/VulkanRenderer.cxx",
+    "command": "cl.exe /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Vulkan /IC:/VulkanSDK/1.4.341.1/Include /std:c++20 /D_DEBUG /D_WINDOWS /c VulkanRenderer.cxx"
+  },
+  {
+    "directory": "C:/MyPrograms/GameEngine/Vulkan",
+    "file": "C:/MyPrograms/GameEngine/Vulkan/VulkanCommandBuffer.cxx",
+    "command": "cl.exe /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Vulkan /IC:/VulkanSDK/1.4.341.1/Include /std:c++20 /D_DEBUG /D_WINDOWS /c VulkanCommandBuffer.cxx"
+  }
+]

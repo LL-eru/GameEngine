@@ -1,0 +1,215 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build: Full Solution",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Editor (Debug x64)",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Editor;Vulkan",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Game (Debug x64)",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Game",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: ShaderTool (Debug x64)",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "ShaderTool",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Vulkan",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Vulkan",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Qt",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Qt",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: DirectX11",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "DirectX11",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: DirectX12",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "DirectX12",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Audio",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Audio",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Core",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Core",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build: Interface",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/msbuild.ps1",
+        "-Target",
+        "Interface",
+        "-Configuration",
+        "Debug",
+        "-Platform",
+        "x64"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
