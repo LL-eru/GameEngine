@@ -2,18 +2,33 @@ CompileFlags:
   Add:
     - -std=c++20
     - -D_DEBUG
-    - -D_CONSOLE
     - -IC:/GLFW/glfw-3.4/include
+    - -IC:/MyPrograms/GameEngine/Core/Public
     - -IC:/MyPrograms/GameEngine/Interface
     - -IC:/MyPrograms/GameEngine/Editor
+    - -IC:/MyPrograms/GameEngine/Core
     - -IC:/MyPrograms/GameEngine/Vulkan
     - -IC:/VulkanSDK/1.4.341.1/Include
-    - -include
-    - C:/MyPrograms/GameEngine/Editor/absuse.hxx
-    - /utf-8
   Remove:
     - -W*
     - -w
+
+---
+If:
+  PathMatch: Editor/.*
+CompileFlags:
+  Add:
+    - -D_CONSOLE
+    - -DGE_HOST_EDITOR
+    - -include
+    - C:/MyPrograms/GameEngine/Editor/absuse.hxx
+
+---
+If:
+  PathMatch: Core/.*
+CompileFlags:
+  Add:
+    - -DGE_BUILD_CORE
 
 ---
 If:
@@ -21,3 +36,29 @@ If:
 CompileFlags:
   Add:
     - -D_WINDOWS
+    - -DGLFW_DLL
+    - -DGE_PLUGIN
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx
+
+---
+If:
+  PathMatch: Game/.*
+CompileFlags:
+  Add:
+    - -D_CONSOLE
+    - -DGE_HOST_GAME
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx
+    - -include
+    - C:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx

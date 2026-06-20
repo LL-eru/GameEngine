@@ -1,0 +1,11 @@
+Create or run a benchmark for a game engine change.
+
+Subject: {{subject}}
+Workload: {{workload}}
+
+Report:
+- Environment and build config.
+- Baseline and changed result.
+- Variance or confidence.
+- Interpretation and next action.
+

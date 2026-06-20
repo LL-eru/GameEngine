@@ -1,0 +1,26 @@
+# filesystem Skill
+
+Mission: provide expert help for path normalization, virtual paths, package mounts, IO in this C++ game engine.
+
+Use when:
+- A task touches this domain directly.
+- A design choice affects API shape, ownership, performance, threading, or serialization.
+- Review needs domain-specific risks instead of style-only feedback.
+
+Process:
+1. Read the relevant rules in .cursor/rules.
+2. Identify current module boundaries and existing local patterns.
+3. State assumptions, invariants, and failure modes before implementation.
+4. Keep changes small enough to build and review.
+5. Add validation: build, test, benchmark, or a documented manual check.
+
+Outputs:
+- filesystem API, path policy, async IO plan.
+- Concrete implementation notes with affected modules.
+- Risks, test plan, and follow-up documentation updates.
+
+Constraints:
+- Preserve engine/backend separation.
+- Avoid hidden allocations, hidden synchronization, and silent fallbacks.
+- Prefer explicit lifetimes, handles, and versioned data contracts.
+

@@ -193,6 +193,19 @@
       "problemMatcher": "$msCompile"
     },
     {
+      "label": "Generate: compile_commands.json",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/generate-compile-commands.ps1"
+      ],
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
       "label": "Build: Interface",
       "type": "process",
       "command": "powershell",

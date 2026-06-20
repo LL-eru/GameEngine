@@ -3,127 +3,127 @@
   "configurations": [
     {
       "name": "Editor (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/x64/Debug/Editor.exe",
       "args": [],
       "cwd": "${workspaceFolder}/bin/x64/Debug",
       "preLaunchTask": "Build: Editor (Debug x64)",
-      "stopOnEntry": false,
-      "env": {
-        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
-      },
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      "stopAtEntry": false,
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+        }
       ]
     },
     {
       "name": "Game (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/x64/Debug/Game.exe",
       "args": [],
       "cwd": "${workspaceFolder}/bin/x64/Debug",
       "preLaunchTask": "Build: Game (Debug x64)",
-      "stopOnEntry": false,
-      "env": {
-        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
-      },
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      "stopAtEntry": false,
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+        }
       ]
     },
     {
       "name": "ShaderTool (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/x64/Debug/ShaderTool.exe",
       "args": [],
       "cwd": "${workspaceFolder}/bin/x64/Debug",
       "preLaunchTask": "Build: ShaderTool (Debug x64)",
-      "stopOnEntry": false,
-      "env": {
-        "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
-      },
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      "stopAtEntry": false,
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+        }
       ]
     },
     {
       "name": "Attach: Vulkan (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: Vulkan",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: Vulkan"
     },
     {
       "name": "Attach: DirectX11 (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: DirectX11",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: DirectX11"
     },
     {
       "name": "Attach: DirectX12 (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: DirectX12",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: DirectX12"
     },
     {
       "name": "Attach: Audio (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: Audio",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: Audio"
     },
     {
       "name": "Attach: Core (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: Core",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: Core"
     },
     {
       "name": "Attach: Interface (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: Interface",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
-      ]
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: Interface"
     },
     {
       "name": "Attach: Qt (Debug x64)",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "attach",
-      "pid": "${command:pickMyProcess}",
-      "preLaunchTask": "Build: Qt",
-      "initCommands": [
-        "settings append target.exec-search-paths ${workspaceFolder}/bin/x64/Debug"
+      "processId": "${command:pickProcess}",
+      "preLaunchTask": "Build: Qt"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/MyPrograms/GameEngine/Editor",
+      "program": "c:/MyPrograms/GameEngine/Editor/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
       ]
     }
   ],
   "compounds": [
     {
       "name": "Editor + Vulkan Plugin",
-      "configurations": ["Editor (Debug x64)"],
+      "configurations": [
+        "Editor (Debug x64)"
+      ],
       "preLaunchTask": "Build: Editor (Debug x64)",
       "stopAll": true
     }

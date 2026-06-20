@@ -1,0 +1,16 @@
+# Resource Template
+
+`cpp
+struct {{ResourceName}}Handle {
+    uint32_t index = 0;
+    uint32_t generation = 0;
+};
+
+class {{ResourceName}}Resource {
+public:
+    bool IsValid() const noexcept;
+};
+`
+
+Define owner, cache key, reload behavior, and failure state.
+

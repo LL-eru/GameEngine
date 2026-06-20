@@ -1,0 +1,12 @@
+# Unit Test Template
+
+`cpp
+TEST({{SuiteName}}, {{BehaviorName}}) {
+    // Arrange
+    // Act
+    // Assert
+}
+`
+
+Name tests after behavior and keep fixtures deterministic.
+

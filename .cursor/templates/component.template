@@ -1,0 +1,12 @@
+# Component Template
+
+`cpp
+struct {{ComponentName}} {
+    static constexpr uint32_t Version = 1;
+
+    // Store data only. Runtime caches belong in systems or resources.
+};
+`
+
+Components should be serializable, compact, and safe to move.
+

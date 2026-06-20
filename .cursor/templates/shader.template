@@ -1,0 +1,14 @@
+# Shader Template
+
+`hlsl
+struct VSInput {
+    float3 position : POSITION;
+};
+
+struct VSOutput {
+    float4 position : SV_POSITION;
+};
+`
+
+Keep descriptor layout, push constants/root constants, and vertex format documented together.
+

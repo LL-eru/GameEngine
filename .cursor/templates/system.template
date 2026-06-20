@@ -1,0 +1,16 @@
+# System Template
+
+`cpp
+class {{SystemName}} final {
+public:
+    bool Initialize({{Dependencies}} deps);
+    void Shutdown();
+    void Update(float deltaSeconds);
+
+private:
+    {{Dependencies}} m_deps{};
+};
+`
+
+State update order, thread affinity, and allocation expectations.
+

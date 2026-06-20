@@ -7,7 +7,13 @@
     <GLFWSharedLibDir>$(GLFWRoot)\build-shared\src\$(Configuration)</GLFWSharedLibDir>
     <GLFWDll>$(GLFWSharedLibDir)\glfw3.dll</GLFWDll>
     <InterfaceDir>$(SolutionDir)Interface</InterfaceDir>
+    <CorePublicDir>$(SolutionDir)Core\Public</CorePublicDir>
     <VulkanSDK14 Condition="'$(VULKAN_SDK)' != ''">$(VULKAN_SDK)</VulkanSDK14>
     <VulkanSDK14 Condition="'$(VulkanSDK14)' == ''">$(VULKAN_SDK)</VulkanSDK14>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(CorePublicDir);$(InterfaceDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
 </Project>

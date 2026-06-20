@@ -1,0 +1,13 @@
+Debug a C++ game engine failure.
+
+Symptom: {{symptom}}
+Expected: {{expected}}
+Observed: {{observed}}
+
+Steps:
+- Reproduce or narrow the failure.
+- Gather logs, asserts, validation output, and call paths.
+- Identify the owning module.
+- Fix root cause, not just the symptom.
+- Add regression coverage or document the validation gap.
+

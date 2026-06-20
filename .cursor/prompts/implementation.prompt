@@ -1,0 +1,14 @@
+Implement the requested C++ game engine change.
+
+Goal: {{goal}}
+Plan: {{plan}}
+Files: {{files}}
+
+Rules:
+- Read nearby code first.
+- Keep the edit scoped.
+- Preserve module boundaries and public contracts.
+- Add focused validation or explain why it is not practical.
+
+Return a concise summary, tests run, and remaining risks.
+

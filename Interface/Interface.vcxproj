@@ -125,6 +125,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="PluginHostContext.cxx">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="ICommandBuffer.hxx" />
     <ClInclude Include="IRenderer.hxx" />
     <ClInclude Include="RendererAPI.hxx" />
