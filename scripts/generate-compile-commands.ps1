@@ -43,7 +43,7 @@ function New-Entry {
     $source = if ($SourcePath) { $SourcePath.Replace('\', '/') } else { "$dir/$fileName" }
     $clPath = $cl.Replace('\', '/')
 
-    $args = @("/nologo", "/std:c++20", "/c", $compileArg)
+    $args = @("/nologo", "/std:c++latest", "/c", $compileArg)
     foreach ($fi in $ForcedIncludes) {
         $args += "/FI$($fi.Replace('\', '/'))"
     }

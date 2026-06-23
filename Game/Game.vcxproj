@@ -106,7 +106,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;GE_HOST_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
       <ForcedIncludeFiles>$(CorePublicDir)\EngineDefines.hxx;$(CorePublicDir)\EngineLog.hxx;$(CorePublicDir)\EngineDebug.hxx;$(CorePublicDir)\EngineMemory.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
@@ -122,7 +121,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GE_HOST_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
       <ForcedIncludeFiles>$(CorePublicDir)\EngineDefines.hxx;$(CorePublicDir)\EngineLog.hxx;$(CorePublicDir)\EngineDebug.hxx;$(CorePublicDir)\EngineMemory.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>

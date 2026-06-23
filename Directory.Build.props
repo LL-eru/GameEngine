@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(CorePublicDir);$(InterfaceDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>

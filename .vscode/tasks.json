@@ -206,6 +206,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Run: Editor (Debug x64)",
+      "type": "process",
+      "command": "${workspaceFolder}/bin/x64/Debug/Editor.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/bin/x64/Debug",
+        "env": {
+          "PATH": "${env:VULKAN_SDK}\\Bin;${env:PATH}"
+        }
+      },
+      "dependsOn": "Build: Editor (Debug x64)",
+      "problemMatcher": []
+    },
+    {
       "label": "Build: Interface",
       "type": "process",
       "command": "powershell",
