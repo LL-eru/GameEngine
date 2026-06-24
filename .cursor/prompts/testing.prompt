@@ -1,0 +1,11 @@
+Plan focused tests for a C++ game engine change.
+
+Behavior: {{behavior}}
+Risk: {{risk}}
+
+Include:
+- Unit tests for pure logic.
+- Integration or smoke tests for module boundaries.
+- Regression test for bugs.
+- Manual validation only when automation is impractical.
+

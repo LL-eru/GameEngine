@@ -1,0 +1,13 @@
+Review this C++ game engine change as a senior reviewer.
+
+Diff/context: {{context}}
+
+Prioritize:
+1. Correctness bugs and regressions.
+2. Ownership and lifetime errors.
+3. Threading and synchronization hazards.
+4. Rendering/API misuse.
+5. Missing tests or benchmarks.
+
+Lead with findings. Include file references and concrete fixes.
+

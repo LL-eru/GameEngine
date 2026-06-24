@@ -1,0 +1,22 @@
+# Class Template
+
+Use for non-interface engine classes.
+
+`cpp
+#pragma once
+
+class {{ClassName}} final {
+public:
+    {{ClassName}}();
+    ~{{ClassName}}();
+
+    {{ClassName}}(const {{ClassName}}&) = delete;
+    {{ClassName}}& operator=(const {{ClassName}}&) = delete;
+    {{ClassName}}({{ClassName}}&&) noexcept;
+    {{ClassName}}& operator=({{ClassName}}&&) noexcept;
+
+private:
+    // Own only resources with the same lifetime as this object.
+};
+`
+

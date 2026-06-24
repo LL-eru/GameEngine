@@ -1,0 +1,16 @@
+# Scene Template
+
+`cpp
+struct SceneHeader {
+    uint32_t version = 1;
+};
+
+class Scene {
+public:
+    bool Load(const char* path);
+    bool Save(const char* path) const;
+};
+`
+
+Use stable IDs for serialized object references.
+

@@ -1,0 +1,12 @@
+Optimize this game engine path only after defining evidence.
+
+Target: {{target}}
+Metric: {{metric}}
+Baseline: {{baseline}}
+
+Provide:
+- Suspected bottlenecks and how to measure them.
+- Minimal changes with risk assessment.
+- Benchmark command/workload.
+- Expected trade-offs.
+

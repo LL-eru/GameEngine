@@ -1,0 +1,12 @@
+# Serialization Template
+
+`cpp
+struct {{TypeName}}Serialized {
+    static constexpr uint32_t Version = 1;
+};
+
+bool Serialize({{Archive}}& archive, {{TypeName}}Serialized& value);
+`
+
+Validate required fields and write migrations for version changes.
+

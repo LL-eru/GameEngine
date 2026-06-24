@@ -1,0 +1,13 @@
+# Benchmark Template
+
+`cpp
+static void BM_{{Name}}(benchmark::State& state) {
+    for (auto _ : state) {
+        // Workload
+    }
+}
+BENCHMARK(BM_{{Name}});
+`
+
+Record workload size, build config, and variance.
+

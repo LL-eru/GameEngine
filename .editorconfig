@@ -1,0 +1,6 @@
+root = true
+
+[*.{h,hxx,cpp,cxx}]
+charset = shift-jis
+end_of_line = crlf
+insert_final_newline = true

@@ -1,0 +1,62 @@
+[
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Editor",
+        "file":  "C:/MyPrograms/GameEngine/Editor/main.cpp",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c main.cpp /FIC:/MyPrograms/GameEngine/Editor/absuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /D_DEBUG /D_CONSOLE /DGE_HOST_EDITOR"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Editor",
+        "file":  "C:/MyPrograms/GameEngine/Editor/Glfw.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c Glfw.cxx /FIC:/MyPrograms/GameEngine/Editor/absuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /D_DEBUG /D_CONSOLE /DGE_HOST_EDITOR"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Editor",
+        "file":  "C:/MyPrograms/GameEngine/Editor/Plugin.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c Plugin.cxx /FIC:/MyPrograms/GameEngine/Editor/absuse.hxx /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Editor /D_DEBUG /D_CONSOLE /DGE_HOST_EDITOR"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Core",
+        "file":  "C:/MyPrograms/GameEngine/Core/CoreInit.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c CoreInit.cxx /IC:/MyPrograms/GameEngine/Core /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /D_DEBUG /DGE_BUILD_CORE"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Core",
+        "file":  "C:/MyPrograms/GameEngine/Core/Debugger.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c Debugger.cxx /IC:/MyPrograms/GameEngine/Core /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /D_DEBUG /DGE_BUILD_CORE"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Core",
+        "file":  "C:/MyPrograms/GameEngine/Core/EngineAllocator.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c EngineAllocator.cxx /IC:/MyPrograms/GameEngine/Core /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /D_DEBUG /DGE_BUILD_CORE"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Core",
+        "file":  "C:/MyPrograms/GameEngine/Core/Logger.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c Logger.cxx /IC:/MyPrograms/GameEngine/Core /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /D_DEBUG /DGE_BUILD_CORE"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Vulkan",
+        "file":  "C:/MyPrograms/GameEngine/Vulkan/VulkanRenderer.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c VulkanRenderer.cxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx /IC:/VulkanSDK/1.4.341.1/Include /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Vulkan /D_DEBUG /D_WINDOWS /DGLFW_DLL /DGE_PLUGIN"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Vulkan",
+        "file":  "C:/MyPrograms/GameEngine/Vulkan/VulkanCommandBuffer.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c VulkanCommandBuffer.cxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx /IC:/VulkanSDK/1.4.341.1/Include /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Vulkan /D_DEBUG /D_WINDOWS /DGLFW_DLL /DGE_PLUGIN"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Vulkan",
+        "file":  "C:/MyPrograms/GameEngine/Interface/PluginHostContext.cxx",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c ../Interface/PluginHostContext.cxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx /IC:/VulkanSDK/1.4.341.1/Include /IC:/GLFW/glfw-3.4/include /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Vulkan /D_DEBUG /D_WINDOWS /DGLFW_DLL /DGE_PLUGIN"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/Game",
+        "file":  "C:/MyPrograms/GameEngine/Game/main.cpp",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c main.cpp /FIC:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/Game /D_DEBUG /D_CONSOLE /DGE_HOST_GAME"
+    },
+    {
+        "directory":  "C:/MyPrograms/GameEngine/ShaderTool",
+        "file":  "C:/MyPrograms/GameEngine/ShaderTool/main.cpp",
+        "command":  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64/cl.exe /nologo /std:c++latest /c main.cpp /FIC:/MyPrograms/GameEngine/Core/Public/EngineDefines.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineLog.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineDebug.hxx /FIC:/MyPrograms/GameEngine/Core/Public/EngineMemory.hxx /IC:/MyPrograms/GameEngine/Core/Public /IC:/MyPrograms/GameEngine/Interface /IC:/MyPrograms/GameEngine/ShaderTool /D_DEBUG /D_CONSOLE"
+    }
+]

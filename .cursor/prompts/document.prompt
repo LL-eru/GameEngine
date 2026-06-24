@@ -1,0 +1,12 @@
+Document a durable game engine decision.
+
+Topic: {{topic}}
+Audience: {{audience}}
+
+Write:
+- Context and decision.
+- Invariants and module ownership.
+- API or data format impact.
+- Validation evidence.
+- Open questions and future work.
+

@@ -76,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,12 +102,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;GE_BUILD_CORE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -115,16 +118,42 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;GE_BUILD_CORE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CentralMemoryManager.cxx" />
+    <ClCompile Include="CoreInit.cxx" />
+    <ClCompile Include="Debugger.cxx" />
+    <ClCompile Include="EngineAllocator.cxx" />
+    <ClCompile Include="Logger.cxx" />
+    <ClCompile Include="MemoryAPI.cxx" />
+    <ClCompile Include="ThreadLocalAllocator.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Public\CentralMemoryManager.hxx" />
+    <ClInclude Include="Public\CoreExport.hxx" />
+    <ClInclude Include="Public\CoreInit.hxx" />
+    <ClInclude Include="Public\Debugger.hxx" />
+    <ClInclude Include="Public\Defines.hxx" />
+    <ClInclude Include="Public\EngineAllocator.hxx" />
+    <ClInclude Include="Public\EngineDebug.hxx" />
+    <ClInclude Include="Public\EngineDefines.hxx" />
+    <ClInclude Include="Public\EngineVirtualMemory.hxx" />
+    <ClInclude Include="Public\ThreadLocalAllocator.hxx" />
+    <ClInclude Include="..\Interface\MemoryAPI.hxx" />
+    <ClInclude Include="Public\EngineLog.hxx" />
+    <ClInclude Include="Public\EngineMemory.hxx" />
+    <ClInclude Include="Public\EnginePlugin.hxx" />
+    <ClInclude Include="Public\HostContext.hxx" />
+    <ClInclude Include="Public\Logger.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
