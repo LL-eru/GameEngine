@@ -3,6 +3,7 @@
 #include "../Interface/IRenderer.hxx"
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 #include <vector>
 #include <string>
@@ -49,6 +50,11 @@ namespace Vulkan
 
         std::vector<const char*> m_extensions;
         std::vector<const char*> m_Layers;
+
+#if defined(_DEBUG)
+        VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+        PFN_vkDestroyDebugUtilsMessengerEXT m_pfnDestroyDebugMessenger = nullptr;
+#endif
 
         vk::UniqueBuffer vertexBuf;
         vk::UniqueDeviceMemory vertexBufMemory;

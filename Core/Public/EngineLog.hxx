@@ -3,6 +3,7 @@
 #include "Logger.hxx"
 #include "HostContext.hxx"
 #include <string>
+#include <cstdlib>
 
 #ifdef GE_PLUGIN
 #define LOG_TRACE(cat, msg) do { \
@@ -46,6 +47,7 @@
         std::string _logMsg = (msg); \
         _hs->Log(HostLogLevel::Fatal, cat, _logMsg.c_str()); \
     } \
+    std::abort(); \
 } while(0)
 #else
 #define LOG_TRACE(cat, msg) Logger::Log(LogLevel::Trace, cat, msg)
@@ -53,5 +55,5 @@
 #define LOG_INFO(cat, msg)  Logger::Log(LogLevel::Info,  cat, msg)
 #define LOG_WARN(cat, msg)  Logger::Log(LogLevel::Warn,  cat, msg)
 #define LOG_ERROR(cat, msg) Logger::Log(LogLevel::Error, cat, msg)
-#define LOG_FATAL(cat, msg) Logger::Log(LogLevel::Fatal, cat, msg)
+#define LOG_FATAL(cat, msg) LogFatalFlushAndAbort(cat, (std::string(msg)).c_str())
 #endif

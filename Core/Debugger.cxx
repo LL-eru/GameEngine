@@ -1,6 +1,8 @@
 #include "Public/Debugger.hxx"
 
 #ifndef SHIPPING
+#include <windows.h>
+#include <debugging>
 #include <iostream>
 
 class DebugConsoleHolder {
@@ -35,7 +37,7 @@ bool DebugAssert(const char* expr, bool condition) {
     DebugStringOutput("Check failed: ");
     DebugStringOutput(expr ? expr : "(null)");
     DebugStringOutput("\n");
-    DebugBreak();
+    std::breakpoint_if_debugging();
     return false;
 }
 

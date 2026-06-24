@@ -3,6 +3,7 @@
 #include "Debugger.hxx"
 #include "HostContext.hxx"
 #include <type_traits>
+#include <windows.h>
 
 #ifndef SHIPPING
 
@@ -33,34 +34,30 @@
 #define Check(value) _engine_check((value), #value)
 
 template <typename T>
-T& _engine_check(const T& value, const char* exprStr) {
+T _engine_check(T value, const char* exprStr) {
     if constexpr (std::is_same_v<T, bool>) {
         if (!value) {
             _ENGINE_ASSERT_FAILED(exprStr);
             DebugBreakPoint_
         }
-        return const_cast<T&>(value);
     }
     else if constexpr (std::is_pointer_v<T>) {
         if (value == nullptr) {
             _ENGINE_ASSERT_FAILED(exprStr);
             DebugBreakPoint_
         }
-        return const_cast<T&>(value);
     }
     else if constexpr (std::is_same_v<T, HRESULT>) {
         if (FAILED(value)) {
             _ENGINE_ASSERT_FAILED(exprStr);
             DebugBreakPoint_
         }
-        return const_cast<T&>(value);
     }
     else {
         _ENGINE_ASSERT_FAILED(exprStr);
         DebugBreakPoint_
-        static T dummy{};
-        return dummy;
     }
+    return value;
 }
 
 #else // !DEBUG
@@ -72,7 +69,3 @@ T& _engine_check(const T& value, const char* exprStr) {
 #define DebugCOUT_(str);
 #define Check(value) (value)
 #endif // !SHIPPING
-
-#ifndef DEBUG
-#define Check(value) (value)
-#endif

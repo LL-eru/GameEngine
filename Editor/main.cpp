@@ -31,8 +31,6 @@ int main()
     HMODULE vulkanDll = LoadLibraryA("Vulkan.dll");
     if (!vulkanDll) {
         LOG_FATAL("Main", "Vulkan.dll のロードに失敗しました。");
-        CoreShutdown();
-        return 1;
     }
 
     auto setHostServices = reinterpret_cast<SetHostServicesFn>(GetProcAddress(vulkanDll, "SetHostServices"));
@@ -45,17 +43,11 @@ int main()
 
     if (!createRenderer || !destroyRenderer) {
         LOG_FATAL("Main", "Vulkan.dll からエクスポート関数を取得できませんでした。");
-        FreeLibrary(vulkanDll);
-        CoreShutdown();
-        return 1;
     }
 
     Render::IRenderer* renderer = createRenderer(Render::GraphicsAPI::Vulkan);
     if (!renderer) {
         LOG_FATAL("Main", "CreateRenderer が nullptr を返しました。");
-        FreeLibrary(vulkanDll);
-        CoreShutdown();
-        return 1;
     }
 
     Render::WindowHandle windowHandle;
@@ -63,10 +55,6 @@ int main()
 
     if (!renderer->Initialize(windowHandle)) {
         LOG_FATAL("Main", "Vulkan 初期化に失敗しました。");
-        destroyRenderer(renderer);
-        FreeLibrary(vulkanDll);
-        CoreShutdown();
-        return 1;
     }
 
     LOG_INFO("Main", "Vulkan レンダラー初期化完了。メインループ開始。");

@@ -1,0 +1,93 @@
+#pragma once
+
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+
+#if defined(__has_include_next)
+#if __has_include_next(<debugging>)
+#include_next <debugging>
+#define GE_HAS_NATIVE_DEBUGGING_HEADER 1
+#endif
+#endif
+
+#ifndef GE_HAS_NATIVE_DEBUGGING_HEADER
+
+#include <csignal>
+
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <sys/sysctl.h>
+#include <unistd.h>
+#elif defined(__linux__)
+#include <cstdio>
+#include <cstring>
+#endif
+
+#ifndef __cpp_lib_debugging
+#define __cpp_lib_debugging 202311L
+#endif
+
+namespace std {
+
+inline bool is_debugger_present() noexcept {
+#if defined(_WIN32)
+    return ::IsDebuggerPresent() != 0;
+#elif defined(__APPLE__)
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+    kinfo_proc info{};
+    size_t size = sizeof(info);
+    if (sysctl(mib, 4, &info, &size, nullptr, 0) != 0) {
+        return false;
+    }
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+#elif defined(__linux__)
+    std::FILE* status = std::fopen("/proc/self/status", "r");
+    if (!status) {
+        return false;
+    }
+
+    char line[256];
+    while (std::fgets(line, sizeof(line), status)) {
+        if (std::strncmp(line, "TracerPid:", 10) == 0) {
+            int tracerPid = 0;
+            (void)std::sscanf(line + 10, "%d", &tracerPid);
+            std::fclose(status);
+            return tracerPid != 0;
+        }
+    }
+
+    std::fclose(status);
+    return false;
+#else
+    return false;
+#endif
+}
+
+inline void breakpoint() noexcept {
+#if defined(_MSC_VER)
+    __debugbreak();
+#elif defined(__has_builtin) && __has_builtin(__builtin_debugtrap)
+    __builtin_debugtrap();
+#elif defined(__has_builtin) && __has_builtin(__builtin_trap)
+    __builtin_trap();
+#elif defined(__i386__) || defined(__x86_64__)
+    __asm__ volatile("int3");
+#else
+    std::raise(SIGTRAP);
+#endif
+}
+
+inline void breakpoint_if_debugging() noexcept {
+    if (std::is_debugger_present()) {
+        std::breakpoint();
+    }
+}
+
+} // namespace std
+
+#endif // GE_HAS_NATIVE_DEBUGGING_HEADER

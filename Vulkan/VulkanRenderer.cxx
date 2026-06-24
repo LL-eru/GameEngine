@@ -40,6 +40,27 @@ struct SceneData {
 static SceneData s_sceneData1 = { Vec2{0.3f, -0.2f} };
 static SceneData s_sceneData2 = { Vec2{0.0f,  0.0f} };
 
+// =-=-= Validation レイヤーコールバック =-=-=
+
+#if defined(_DEBUG)
+static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT      severity,
+    VkDebugUtilsMessageTypeFlagsEXT             /*type*/,
+    const VkDebugUtilsMessengerCallbackDataEXT* pData,
+    void*                                       /*pUserData*/)
+{
+    if (!pData) return VK_FALSE;
+    if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        LOG_ERROR("Vulkan/Validation", std::string(pData->pMessage));
+    } else if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+        LOG_WARN("Vulkan/Validation", std::string(pData->pMessage));
+    } else {
+        LOG_INFO("Vulkan/Validation", std::string(pData->pMessage));
+    }
+    return VK_FALSE;
+}
+#endif
+
 // =-=-= ユーティリティ =-=-=
 
 static uint32_t FindMemoryType(
@@ -142,6 +163,7 @@ bool Vulkan::VulkanRenderer::Initialize(const Render::WindowHandle& window)
 
 #if defined(_DEBUG)
     m_Layers.push_back("VK_LAYER_KHRONOS_validation");
+    m_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
     // インスタンスの作成
@@ -167,6 +189,30 @@ bool Vulkan::VulkanRenderer::Initialize(const Render::WindowHandle& window)
         LOG_ERROR("Vulkan", std::string("インスタンス作成失敗: ") + e.what());
         return false;
     }
+
+#if defined(_DEBUG)
+    {
+        auto pfnCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+            vkGetInstanceProcAddr(static_cast<VkInstance>(m_Instance.get()),
+                                  "vkCreateDebugUtilsMessengerEXT"));
+        m_pfnDestroyDebugMessenger = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+            vkGetInstanceProcAddr(static_cast<VkInstance>(m_Instance.get()),
+                                  "vkDestroyDebugUtilsMessengerEXT"));
+        if (pfnCreate) {
+            VkDebugUtilsMessengerCreateInfoEXT dbgInfo{};
+            dbgInfo.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+            dbgInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                      VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+            dbgInfo.messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                      VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                      VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+            dbgInfo.pfnUserCallback = VulkanDebugCallback;
+            pfnCreate(static_cast<VkInstance>(m_Instance.get()), &dbgInfo, nullptr, &m_debugMessenger);
+        } else {
+            LOG_WARN("Vulkan", "vkCreateDebugUtilsMessengerEXT が見つかりません。Validation メッセージは無効。");
+        }
+    }
+#endif
 
     // サーフェスの作成 (GLFW)
     VkSurfaceKHR rawSurface;
@@ -691,6 +737,14 @@ void Vulkan::VulkanRenderer::RecreateSwapchain()
 
 void Vulkan::VulkanRenderer::Shutdown()
 {
+#if defined(_DEBUG)
+    if (m_debugMessenger != VK_NULL_HANDLE && m_pfnDestroyDebugMessenger) {
+        m_pfnDestroyDebugMessenger(
+            static_cast<VkInstance>(m_Instance.get()), m_debugMessenger, nullptr);
+        m_debugMessenger = VK_NULL_HANDLE;
+    }
+#endif
+
     if (m_Device) {
         m_Device->waitIdle();
 

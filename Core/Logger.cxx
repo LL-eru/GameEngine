@@ -1,7 +1,10 @@
 #include "Public/Logger.hxx"
-#include <iostream>
+#include <print>
+#include <cstdlib>
+#include <system_error>
 
 std::vector<std::shared_ptr<ILogSink>> Logger::sinks;
+std::mutex Logger::sinksMutex;
 std::queue<LogMessage> Logger::queue;
 std::mutex Logger::mutex;
 std::condition_variable Logger::cv;
@@ -22,7 +25,12 @@ void ConsoleSink::Write(const LogMessage& msg) {
         << "[" << ToString(msg.level) << "]"
         << "[" << msg.category << "] "
         << msg.message;
-    std::cout << oss.str() << std::endl;
+    try {
+        std::print("{}\n", oss.str());
+        fflush(stdout);
+    } catch (const std::system_error&) {
+        // Keep console output failures from terminating the logger worker.
+    }
 }
 
 FileSink::FileSink(const std::string& filename) {
@@ -31,6 +39,14 @@ FileSink::FileSink(const std::string& filename) {
 #else
     file = fopen(filename.c_str(), "w");
 #endif
+}
+
+FileSink::~FileSink() {
+    if (file) {
+        fflush(file);
+        fclose(file);
+        file = nullptr;
+    }
 }
 
 void FileSink::Write(const LogMessage& msg) {
@@ -65,6 +81,7 @@ void Logger::Uninit() {
 }
 
 void Logger::AddSink(std::shared_ptr<ILogSink> sink) {
+    std::lock_guard<std::mutex> lock(sinksMutex);
     sinks.push_back(sink);
 }
 
@@ -95,8 +112,11 @@ void Logger::Worker() {
             LogMessage msg = queue.front();
             queue.pop();
             lock.unlock();
-            for (auto& sink : sinks) {
-                sink->Write(msg);
+            {
+                std::lock_guard<std::mutex> sinksLock(sinksMutex);
+                for (auto& sink : sinks) {
+                    sink->Write(msg);
+                }
             }
             lock.lock();
         }
@@ -105,4 +125,10 @@ void Logger::Worker() {
 
 void CoreLog(HostLogLevel level, const char* category, const char* message) {
     Logger::Log(static_cast<LogLevel>(static_cast<int>(level)), category, message ? message : "");
+}
+
+[[noreturn]] void LogFatalFlushAndAbort(const char* category, const char* message) {
+    Logger::Log(LogLevel::Fatal, category, message ? message : "");
+    Logger::Uninit();
+    std::abort();
 }

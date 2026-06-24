@@ -59,11 +59,12 @@ public:
 class GE_API FileSink : public ILogSink {
 public:
     explicit FileSink(const std::string& filename);
+    ~FileSink();
     void Write(const LogMessage& msg) override;
 
 private:
     std::mutex fileMutex;
-    FILE* file;
+    FILE* file = nullptr;
 };
 
 class GE_API Logger {
@@ -78,6 +79,7 @@ private:
     static void Worker();
 
     static std::vector<std::shared_ptr<ILogSink>> sinks;
+    static std::mutex sinksMutex;
     static std::queue<LogMessage> queue;
     static std::mutex mutex;
     static std::condition_variable cv;
@@ -87,3 +89,5 @@ private:
 };
 
 GE_API void CoreLog(HostLogLevel level, const char* category, const char* message);
+
+[[noreturn]] GE_API void LogFatalFlushAndAbort(const char* category, const char* message);
