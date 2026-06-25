@@ -8,7 +8,8 @@ Use when:
 - Review needs domain-specific risks instead of style-only feedback.
 
 Process:
-1. Read the relevant rules in .cursor/rules.
+1. Read `docs/memory.md` and `.cursor/memory/allocator_design.md`.
+2. Read the relevant rules in `.cursor/rules`.
 2. Identify current module boundaries and existing local patterns.
 3. State assumptions, invariants, and failure modes before implementation.
 4. Keep changes small enough to build and review.

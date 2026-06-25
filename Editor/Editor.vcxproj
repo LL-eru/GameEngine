@@ -146,6 +146,7 @@
     <ClCompile Include="Glfw.cxx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Plugin.cxx" />
+    <ClCompile Include="RpmallocOverride.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="absuse.hxx" />

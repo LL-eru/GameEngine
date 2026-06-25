@@ -138,6 +138,7 @@
     <ClCompile Include="..\Interface\PluginHostContext.cxx" />
     <ClCompile Include="VulkanCommandBuffer.cxx" />
     <ClCompile Include="VulkanRenderer.cxx" />
+    <ClCompile Include="RpmallocOverride.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanCommandBuffer.hxx" />

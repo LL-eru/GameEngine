@@ -1,25 +1,30 @@
 // =============================================================================
 // EngineApiTest.cxx
 //
-// Exercises the Phase 3 (TLS cache) + Phase 4 (module-boundary API) surface
-// through the real Core.dll. Linked against Core.lib (so Engine::Allocate/Free
-// are imported from Core.dll) and CrossModulePlugin.lib (a second module).
+// Exercises the module-boundary surface through the real Core.dll, which hosts
+// the single process-wide rpmalloc instance. Linked against Core (Engine::*
+// imported) and CrossModulePlugin (a second module sharing the same heap).
 //
 // Covered:
 //   Test 1   : alignment & boundary through Engine::Allocate
-//   Test 2.1 : Core.dll allocates -> EXE frees (and EXE allocates -> plugin frees)
-//   Test 2.2 : plugin (module A) allocates -> EXE (module B) frees, both ways
-//   Test 3.1 : 32-thread random alloc/free stress through the TLS path
+//   Test 2.1 : Core.dll allocates -> plugin frees (and the reverse)
+//   Test 2.2 : raw operator new in one module -> operator delete in another
+//   Test 3.1 : 32-thread stress through the rpmalloc-backed API
 //   Test 3.2 : cross-thread free (allocate on thread A, free on thread B)
+//
+// This TU also includes RpmallocOverride.hxx so the EXE's own operator
+// new/delete route to the shared heap, which is required for Test 2.2.
 // =============================================================================
 
 #include "MemoryAPI.hxx"
+#include "RpmallocOverride.hxx"
 
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <new>
 #include <random>
 #include <thread>
 #include <vector>
@@ -27,6 +32,8 @@
 extern "C" {
 __declspec(dllimport) void* PluginAllocate(std::size_t size, std::size_t alignment);
 __declspec(dllimport) void  PluginFree(void* ptr);
+__declspec(dllimport) void* PluginOperatorNew(std::size_t size);
+__declspec(dllimport) void  PluginOperatorDelete(void* ptr);
 }
 
 namespace {
@@ -75,7 +82,7 @@ void TestAlignmentAndBoundary() {
 
 // -----------------------------------------------------------------------------
 void TestCrossModule() {
-    Section("Test 2: cross-module allocate/free (EXE <-> plugin DLL)");
+    Section("Test 2.1: cross-module Engine::Allocate/Free (EXE <-> plugin DLL)");
 
     // EXE allocates (Core.dll) -> plugin DLL frees.
     for (int i = 0; i < 1000; ++i) {
@@ -103,8 +110,29 @@ void TestCrossModule() {
 }
 
 // -----------------------------------------------------------------------------
+void TestCrossModuleOperatorNew() {
+    Section("Test 2.2: raw operator new/delete across modules (shared rpmalloc)");
+
+    // Plugin's operator new -> EXE's operator delete.
+    for (int i = 0; i < 1000; ++i) {
+        void* p = PluginOperatorNew(64 + (i % 9) * 16);
+        CHECK(p != nullptr);
+        Touch(p, 64);
+        ::operator delete(p); // EXE side, overridden -> shared rpmalloc
+    }
+
+    // EXE's operator new -> plugin's operator delete.
+    for (int i = 0; i < 1000; ++i) {
+        void* p = ::operator new(48 + (i % 5) * 32);
+        CHECK(p != nullptr);
+        Touch(p, 48);
+        PluginOperatorDelete(p);
+    }
+}
+
+// -----------------------------------------------------------------------------
 void TestConcurrencyStress() {
-    Section("Test 3.1: 32-thread stress (TLS path)");
+    Section("Test 3.1: 32-thread stress (rpmalloc API)");
     constexpr int kThreads = 32;
     constexpr int kIterations = 10000;
     std::atomic<int> bad{0};
@@ -135,6 +163,7 @@ void TestConcurrencyStress() {
             }
         }
         for (auto& e : live) Engine::Free(e.first);
+        Engine::FlushThreadCache();
     };
 
     std::vector<std::thread> threads;
@@ -143,8 +172,8 @@ void TestConcurrencyStress() {
 
     CHECK(bad.load() == 0);
     const auto stats = Engine::QueryMemoryStats();
-    std::printf("  stats: blockChunks=%zu largeBlocks=%zu reserved=%zu bytes\n",
-                stats.blockChunks, stats.largeBlocks, stats.bytesReserved);
+    std::printf("  stats: mapped=%zu cached=%zu huge=%zu\n",
+                stats.bytesMapped, stats.bytesCached, stats.bytesHugeAlloc);
 }
 
 // -----------------------------------------------------------------------------
@@ -176,10 +205,11 @@ void TestCrossThreadFree() {
 } // namespace
 
 int main() {
-    std::printf("Engine memory API (TLS + module boundary) test suite\n");
+    std::printf("Engine memory API (rpmalloc shared heap + module boundary) test suite\n");
 
     TestAlignmentAndBoundary();
     TestCrossModule();
+    TestCrossModuleOperatorNew();
     TestConcurrencyStress();
     TestCrossThreadFree();
 

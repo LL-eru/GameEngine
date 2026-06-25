@@ -8,13 +8,14 @@
     <GLFWDll>$(GLFWSharedLibDir)\glfw3.dll</GLFWDll>
     <InterfaceDir>$(SolutionDir)Interface</InterfaceDir>
     <CorePublicDir>$(SolutionDir)Core\Public</CorePublicDir>
+    <RpmallocDir>$(SolutionDir)third_party\rpmalloc</RpmallocDir>
     <VulkanSDK14 Condition="'$(VULKAN_SDK)' != ''">$(VULKAN_SDK)</VulkanSDK14>
     <VulkanSDK14 Condition="'$(VulkanSDK14)' == ''">$(VULKAN_SDK)</VulkanSDK14>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(CorePublicDir);$(InterfaceDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CorePublicDir);$(InterfaceDir);$(RpmallocDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>

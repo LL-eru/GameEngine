@@ -9,10 +9,15 @@
 //     module (Core) is compiled with GE_BUILD_CORE and exports them; every
 //     other module imports them. A single allocator instance therefore lives in
 //     Core.dll and is shared by the EXE and all plugin DLLs.
-//   * Engine::Allocate / Engine::Free are the only entry points modules need.
-//     Because all calls funnel into Core's one CentralMemoryManager + thread
-//     caches, memory allocated in one module can be freed in another (and on a
-//     different thread) safely -- the central goal of this subsystem.
+//   * Engine::Allocate / Engine::Free are the primary heap entry points for
+//     cross-module code. HostServices::AllocHeap / FreeHeap route to the same
+//     rpmalloc instance. Because all calls funnel into Core's single heap,
+//     allocated in one module can be freed in another (and on a different
+//     thread) safely -- the central goal of this subsystem.
+//
+// Ownership: memory from this API lives on Core.dll's rpmalloc heap. Do not hand
+// it to third-party code that will free with raw malloc/free (CRT heap). Copy or
+// keep ownership inside engine code that uses Engine::Free / overridden new/delete.
 //
 // The interface is a flat C-ABI-friendly surface (size_t / void*), so no STL
 // types leak across the boundary.
@@ -37,6 +42,7 @@
 namespace Engine {
 
 // Allocate `size` bytes aligned to at least `alignment` (a power of two).
+// Non-power-of-two alignment is trapped via ENGINE_VM_VERIFY and returns nullptr.
 // Returns nullptr for a zero-byte request or on out-of-memory.
 [[nodiscard]] ENGINE_API void* Allocate(std::size_t size,
                                         std::size_t alignment = alignof(std::max_align_t));
@@ -50,11 +56,13 @@ ENGINE_API void Free(void* ptr) noexcept;
 // reclamation.
 ENGINE_API void FlushThreadCache() noexcept;
 
-// Lightweight diagnostics snapshot (POD, ABI-stable).
+// Lightweight diagnostics snapshot (POD, ABI-stable). All figures are in BYTES
+// and reflect rpmalloc's global counters. Core.dll builds rpmalloc with
+// ENABLE_STATISTICS, so these are populated (they would read 0 otherwise).
 struct MemoryStatsView {
-    std::size_t blockChunks   = 0;
-    std::size_t largeBlocks   = 0;
-    std::size_t bytesReserved = 0;
+    std::size_t bytesMapped    = 0; // total address space mapped from the OS
+    std::size_t bytesCached    = 0; // bytes held in the global span cache
+    std::size_t bytesHugeAlloc = 0; // bytes in oversized (huge) allocations
 };
 [[nodiscard]] ENGINE_API MemoryStatsView QueryMemoryStats() noexcept;
 

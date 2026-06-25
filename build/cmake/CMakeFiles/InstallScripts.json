@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/MyPrograms/GameEngine/build/cmake/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

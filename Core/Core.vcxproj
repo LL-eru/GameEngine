@@ -102,7 +102,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;GE_BUILD_CORE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -110,6 +110,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>Rpmalloc.def</ModuleDefinitionFile>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <AdditionalOptions>/IGNORE:4006 /IGNORE:4088 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -118,7 +121,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;GE_BUILD_CORE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -126,19 +129,30 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>Rpmalloc.def</ModuleDefinitionFile>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <AdditionalOptions>/IGNORE:4006 /IGNORE:4088 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CentralMemoryManager.cxx" />
     <ClCompile Include="CoreInit.cxx" />
     <ClCompile Include="Debugger.cxx" />
+    <ClCompile Include="EngineArenas.cxx" />
     <ClCompile Include="EngineAllocator.cxx" />
     <ClCompile Include="Logger.cxx" />
     <ClCompile Include="MemoryAPI.cxx" />
-    <ClCompile Include="ThreadLocalAllocator.cxx" />
+    <ClCompile Include="RpmallocNew.cxx" />
+    <ClCompile Include="..\third_party\rpmalloc\rpmalloc.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <ConformanceMode>false</ConformanceMode>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PreprocessorDefinitions>ENABLE_OVERRIDE=1;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=1;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\CentralMemoryManager.hxx" />
+    <None Include="Rpmalloc.def" />
+    <ClInclude Include="..\third_party\rpmalloc\rpmalloc.h" />
+    <ClInclude Include="..\third_party\rpmalloc\rpnew.h" />
     <ClInclude Include="Public\CoreExport.hxx" />
     <ClInclude Include="Public\CoreInit.hxx" />
     <ClInclude Include="Public\Debugger.hxx" />
@@ -147,7 +161,6 @@
     <ClInclude Include="Public\EngineDebug.hxx" />
     <ClInclude Include="Public\EngineDefines.hxx" />
     <ClInclude Include="Public\EngineVirtualMemory.hxx" />
-    <ClInclude Include="Public\ThreadLocalAllocator.hxx" />
     <ClInclude Include="..\Interface\MemoryAPI.hxx" />
     <ClInclude Include="Public\EngineLog.hxx" />
     <ClInclude Include="Public\EngineMemory.hxx" />

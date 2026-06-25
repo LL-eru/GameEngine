@@ -39,8 +39,7 @@ DLL 境界をまたいだ ABI 安定性を確保する。
 
 ### 4. 用途別メモリアリーナ
 
-`FrameArena`（バンプ）、`ObjectPool`（固定サイズ）、`SegregatedFreeList`（汎用）、`GPUArena` の  
-4 種類を `ArenaId` で切り替える統一 API を提供する。
+Core.dll の共有 rpmalloc heap、フレーム用バンプアリーナ（`AllocFrame`）、GPU ステージング（`AllocGpu`）、固定サイズプール（`CreatePool` + `PoolHandle`）を、`HostServices` の型付き関数ポインタで提供する。詳細は [docs/memory.md](docs/memory.md)。
 
 ---
 

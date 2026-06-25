@@ -129,7 +129,7 @@ Game.exe / Editor 共通で Assimp なしに読み込めるようにする。
 - [ ] **5-1** `LoadMeshAsset(const char* path) -> MeshAsset` を Core または専用 Resource モジュールに配置
 - [ ] **5-2** ファイル I/O は `HostServices` 経由か std::ifstream か方針を決める
 - [ ] **5-3** メモリ確保方針
-  - [ ] `ObjectPool` / `SegregatedFreeList` のどちらで `MeshAsset` を保持するか
+  - [ ] `ObjectPool` / `Engine::Allocate`（共有 rpmalloc heap）のどちらで `MeshAsset` を保持するか
   - [ ] ロード失敗時のリソース解放
 - [ ] **5-4** アセットキャッシュ（同一パス再ロード防止）? 初期は省略可、TODO として記載
 - [ ] **5-5** Game.exe で Assimp シンボルがリンクされていないことをビルドで確認

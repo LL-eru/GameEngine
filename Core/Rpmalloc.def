@@ -1,0 +1,27 @@
+; Exports the rpmalloc C entry points from Core.dll so that every other module
+; (EXE, plugin DLLs) shares this single allocator instance. Cross-module and
+; cross-thread frees are correct because there is exactly one rpmalloc heap.
+;
+; x64 __cdecl names are undecorated, so the bare names below are sufficient.
+EXPORTS
+    rpmalloc
+    rpfree
+    rpcalloc
+    rprealloc
+    rpaligned_alloc
+    rpaligned_realloc
+    rpaligned_calloc
+    rpmemalign
+    rpposix_memalign
+    rpmalloc_usable_size
+    rpmalloc_linker_reference
+    rpmalloc_initialize
+    rpmalloc_initialize_config
+    rpmalloc_finalize
+    rpmalloc_thread_initialize
+    rpmalloc_thread_finalize
+    rpmalloc_thread_collect
+    rpmalloc_is_thread_initialized
+    rpmalloc_set_main_thread
+    rpmalloc_global_statistics
+    rpmalloc_thread_statistics

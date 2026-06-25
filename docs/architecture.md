@@ -44,14 +44,22 @@ Editor.exe / Game.exe   ← ホスト実行ファイル
 プラグインは Core.dll に**直接リンクしない**。代わりに `HostServices` という関数ポインタテーブルを受け取る。
 
 ```
-// Interface/HostServices.hxx
+// Interface/HostServices.hxx（抜粋）
 struct HostServices {
     void (*Log)(HostLogLevel, const char* category, const char* message);
     void (*DebugOutput)(const char* text);
     bool (*Assert)(const char* expr, bool condition);
-    void* (*Alloc)(size_t size, uint32_t arenaId);
-    void  (*Free)(void* ptr, uint32_t arenaId);
-    void  (*FrameArenaReset)();
+
+    void* (*AllocHeap)(size_t size, size_t alignment);
+    void  (*FreeHeap)(void* ptr);
+    void* (*AllocFrame)(size_t size, size_t alignment);
+    void* (*AllocGpu)(size_t size, size_t alignment);
+    void  (*ResetFrameArenas)();
+
+    PoolHandle (*CreatePool)(size_t objectSize, size_t capacity);
+    void       (*DestroyPool)(PoolHandle pool);
+    void*      (*AllocPool)(PoolHandle pool);
+    void       (*FreePool)(PoolHandle pool, void* ptr);
 };
 ```
 
@@ -66,8 +74,10 @@ DLL 境界をまたいで Core.dll をリンクすると、ビルド構成や MSVC ランタイムのバージ
 
 | ホスト | サービスセット |
 |--------|--------------|
-| `CoreInitEditor()` | Log + DebugOutput + Assert + Alloc + Free + FrameArenaReset（全機能） |
-| `CoreInitGame()` | Alloc + Free + FrameArenaReset のみ（Log/Debug/Assert は null） |
+| `CoreInitEditor()` | Log + DebugOutput + Assert + メモリ API 一式（全機能） |
+| `CoreInitGame()` | メモリ API のみ（Log/Debug/Assert は null） |
+
+メモリ API とは `AllocHeap` / `FreeHeap` / `AllocFrame` / `AllocGpu` / `ResetFrameArenas` / `CreatePool` / `DestroyPool` / `AllocPool` / `FreePool` を指す。詳細は [memory.md](memory.md)。
 
 Game ビルドではログや assert のオーバーヘッドをゼロにできる。これは出荷時のパフォーマンス要件に応える設計上の選択である。
 

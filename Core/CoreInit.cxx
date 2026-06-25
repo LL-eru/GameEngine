@@ -6,20 +6,28 @@
 
 static HostServices g_hostServices{};
 
+static void FillMemoryServices(HostServices& services) {
+    services.AllocHeap        = CoreAllocHeap;
+    services.FreeHeap         = CoreFreeHeap;
+    services.AllocFrame       = CoreAllocFrame;
+    services.AllocGpu         = CoreAllocGpu;
+    services.ResetFrameArenas = CoreResetFrameArenas;
+    services.CreatePool       = CoreCreatePool;
+    services.DestroyPool      = CoreDestroyPool;
+    services.AllocPool        = CoreAllocPool;
+    services.FreePool         = CoreFreePool;
+}
+
 static void FillFullHostServices() {
     g_hostServices.Log = CoreLog;
     g_hostServices.DebugOutput = DebugStringOutput;
     g_hostServices.Assert = DebugAssert;
-    g_hostServices.Alloc = CoreAlloc;
-    g_hostServices.Free = CoreFree;
-    g_hostServices.FrameArenaReset = CoreFrameArenaReset;
+    FillMemoryServices(g_hostServices);
 }
 
 static void FillAllocOnlyHostServices() {
     std::memset(&g_hostServices, 0, sizeof(g_hostServices));
-    g_hostServices.Alloc = CoreAlloc;
-    g_hostServices.Free = CoreFree;
-    g_hostServices.FrameArenaReset = CoreFrameArenaReset;
+    FillMemoryServices(g_hostServices);
 }
 
 void CoreInitEditor() {

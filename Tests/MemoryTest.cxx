@@ -1,20 +1,22 @@
 // =============================================================================
 // MemoryTest.cxx
 //
-// Self-contained test driver for Phase 1 (EngineVirtualMemory) and Phase 2
-// (CentralMemoryManager). No external test framework is used so the allocator
-// core keeps its "standard library only" promise; a tiny CHECK harness reports
-// pass/fail and the process exit code reflects the result.
+// Unit/integration tests for the post-rpmalloc allocator stack:
+//   1. FrameArena  : OS-direct bump, absolute-address alignment, exhaustion,
+//                    reset reuse.
+//   2. GPUArena    : 256 B default alignment bump.
+//   3. ObjectPool  : fixed-size free list, Contains/boundary, reuse.
+//   4. Engine::Allocate (rpmalloc) : alignment & boundary, multi-thread stress,
+//                    cross-thread free.
+//   5. EngineAllocator pool manager : CreatePool / AllocPool / FreePool handles.
+//   6. HostServices bindings        : CoreAllocHeap / CoreAllocFrame / Åc
 //
-// Covered (subset of the project test matrix applicable to Phase 1 & 2):
-//   1. Basic alignment & boundary (Unit)
-//   2. Multi-thread stress & contention (Concurrency)
-//   3. Cross-thread free safety
-// DLL-boundary tests belong to Phase 4 and are intentionally out of scope here.
+// A tiny CHECK harness reports pass/fail; the process exit code reflects it.
 // =============================================================================
 
-#include "CentralMemoryManager.hxx"
-#include "EngineVirtualMemory.hxx"
+#include "EngineAllocator.hxx"
+#include "CoreInit.hxx"
+#include "MemoryAPI.hxx"
 
 #include <atomic>
 #include <cstdint>
@@ -23,8 +25,6 @@
 #include <random>
 #include <thread>
 #include <vector>
-
-using namespace Engine::Memory;
 
 namespace {
 
@@ -41,217 +41,271 @@ void Report(bool ok, const char* expr, const char* file, int line) {
 
 #define CHECK(cond) Report((cond), #cond, __FILE__, __LINE__)
 
-void Section(const char* name) {
-    std::printf("\n== %s ==\n", name);
+void Section(const char* name) { std::printf("\n== %s ==\n", name); }
+
+bool IsAligned(const void* p, std::size_t a) {
+    return (reinterpret_cast<std::uintptr_t>(p) & (a - 1)) == 0;
 }
 
-// Touch the whole allocation so we crash here (not later) if commit is broken.
-void TouchMemory(void* ptr, std::size_t size) {
-    std::memset(ptr, 0xAB, size);
-}
+void Touch(void* p, std::size_t n) { std::memset(p, 0xAB, n); }
 
 // -----------------------------------------------------------------------------
-// Phase 1: alignment helpers + OS allocator round-trip
-// -----------------------------------------------------------------------------
-void TestPhase1() {
-    Section("Phase 1: alignment helpers");
-    CHECK(IsPowerOfTwo(1));
-    CHECK(IsPowerOfTwo(4096));
-    CHECK(!IsPowerOfTwo(0));
-    CHECK(!IsPowerOfTwo(3));
-    CHECK(CeilToPowerOfTwo(0) == 1);
-    CHECK(CeilToPowerOfTwo(1) == 1);
-    CHECK(CeilToPowerOfTwo(5) == 8);
-    CHECK(CeilToPowerOfTwo(4095) == 4096);
-    CHECK(CeilToPowerOfTwo(4097) == 8192);
-    CHECK(AlignUp(std::size_t{1}, 16) == 16);
-    CHECK(AlignUp(std::size_t{16}, 16) == 16);
-    CHECK(AlignUp(std::size_t{17}, 16) == 32);
+void TestFrameArena() {
+    Section("Test 1: FrameArena (OS-direct bump)");
+    FrameArena arena;
+    arena.Initialize(1 * 1024 * 1024);
 
-    Section("Phase 1: OS virtual allocator round-trip");
-    PlatformVirtualAllocator os;
-    const std::size_t pageSize = os.PageSize();
-    CHECK(IsPowerOfTwo(pageSize));
-    CHECK(pageSize >= 4096);
-
-    const std::size_t reserveSize = pageSize * 16;
-    void* region = os.Reserve(reserveSize);
-    CHECK(region != nullptr);
-    CHECK(IsAligned(region, pageSize));
-
-    CHECK(os.Commit(region, reserveSize));
-    TouchMemory(region, reserveSize); // must not fault
-    os.Decommit(region, reserveSize);
-    os.Release(region, reserveSize);
-}
-
-// -----------------------------------------------------------------------------
-// Phase 2 / Test 1: basic alignment & boundary
-// -----------------------------------------------------------------------------
-void TestAlignmentAndBoundary() {
-    Section("Test 1: alignment & boundary");
-    CentralMemoryManager mgr;
-    mgr.Initialize();
-
-    const std::size_t alignments[] = { 1, 4, 16, 64, 16 * 1024 };
-    for (std::size_t a : alignments) {
-        void* p = mgr.Allocate(a == 1 ? 1 : a, a);
+    // Various alignments must be honoured against the absolute address.
+    const std::size_t aligns[] = { 1, 4, 16, 64, 256, 4096 };
+    for (std::size_t a : aligns) {
+        void* p = arena.Allocate(a, a);
         CHECK(p != nullptr);
         CHECK(IsAligned(p, a));
-        TouchMemory(p, a == 1 ? 1 : a);
-        mgr.Free(p);
+        if (p) Touch(p, a);
     }
 
-    // Page-boundary-crossing sizes.
-    const std::size_t sizes[] = { 1, 4, 16, 64, 4095, 4096, 4097, 64 * 1024 };
+    // Monotonic growth: two allocations never overlap.
+    void* a1 = arena.Allocate(1000, 16);
+    void* a2 = arena.Allocate(1000, 16);
+    CHECK(a1 != nullptr && a2 != nullptr);
+    CHECK(a1 != a2);
+    CHECK(static_cast<unsigned char*>(a2) >= static_cast<unsigned char*>(a1) + 1000);
+
+    // Exhaustion returns nullptr rather than corrupting.
+    void* huge = arena.Allocate(4 * 1024 * 1024, 16);
+    CHECK(huge == nullptr);
+
+    // Reset rewinds the cursor; the next allocation reuses the base.
+    const std::size_t usedBefore = arena.GetUsedBytes();
+    CHECK(usedBefore > 0);
+    arena.Reset();
+    CHECK(arena.GetUsedBytes() == 0);
+    void* afterReset = arena.Allocate(64, 64);
+    CHECK(afterReset != nullptr);
+    CHECK(IsAligned(afterReset, 64));
+
+    arena.Shutdown();
+    CHECK(arena.GetCapacityBytes() == 0);
+}
+
+// -----------------------------------------------------------------------------
+void TestGpuArena() {
+    Section("Test 2: GPUArena (256 B default alignment)");
+    GPUArena arena;
+    arena.Initialize(2 * 1024 * 1024);
+
+    for (int i = 0; i < 16; ++i) {
+        void* p = arena.Allocate(500 + i * 37);
+        CHECK(p != nullptr);
+        CHECK(IsAligned(p, 256));
+        if (p) Touch(p, 500);
+    }
+    arena.Reset();
+    CHECK(arena.GetUsedBytes() == 0);
+    arena.Shutdown();
+}
+
+// -----------------------------------------------------------------------------
+void TestObjectPool() {
+    Section("Test 3: ObjectPool (fixed-size free list)");
+    ObjectPool pool;
+    pool.Initialize(48, 8); // objectSize rounded up internally if needed
+
+    std::vector<void*> live;
+    for (int i = 0; i < 8; ++i) {
+        void* p = pool.Allocate();
+        CHECK(p != nullptr);
+        CHECK(pool.Contains(p));
+        live.push_back(p);
+    }
+    // Capacity reached -> nullptr.
+    CHECK(pool.Allocate() == nullptr);
+
+    // Foreign pointer is rejected (not in storage).
+    int stackVar = 0;
+    CHECK(!pool.Contains(&stackVar));
+
+    // Free everything back and re-acquire the same slots.
+    for (void* p : live) pool.Free(p);
+    void* reused = pool.Allocate();
+    CHECK(reused != nullptr);
+    CHECK(pool.Contains(reused));
+
+    pool.Shutdown();
+}
+
+// -----------------------------------------------------------------------------
+void TestEngineAllocate() {
+    Section("Test 4: Engine::Allocate (rpmalloc) alignment & boundary");
+    const std::size_t aligns[] = { 1, 4, 16, 64, 256, 4096 };
+    for (std::size_t a : aligns) {
+        void* p = Engine::Allocate(a == 1 ? 1 : a, a);
+        CHECK(p != nullptr);
+        CHECK(IsAligned(p, a));
+        if (p) Touch(p, a == 1 ? 1 : a);
+        Engine::Free(p);
+    }
+    const std::size_t sizes[] = { 1, 16, 4095, 4096, 4097, 64 * 1024, 2 * 1024 * 1024 };
     for (std::size_t s : sizes) {
-        void* p = mgr.Allocate(s, 16);
+        void* p = Engine::Allocate(s, 16);
         CHECK(p != nullptr);
         CHECK(IsAligned(p, 16));
-        TouchMemory(p, s); // exercises every committed byte across page borders
-        mgr.Free(p);
+        if (p) Touch(p, s);
+        Engine::Free(p);
     }
-
-    // Large path (exceeds kMaxBlockSize -> dedicated OS reservation).
-    void* big = mgr.Allocate(2 * 1024 * 1024, 4096);
-    CHECK(big != nullptr);
-    CHECK(IsAligned(big, 4096));
-    TouchMemory(big, 2 * 1024 * 1024);
-    mgr.Free(big);
-
-    mgr.Shutdown();
 }
 
-// -----------------------------------------------------------------------------
-// Phase 2: raw chunk acquire/release + recycling
-// -----------------------------------------------------------------------------
-void TestRawChunks() {
-    Section("Phase 2: raw 2 MiB chunk pool");
-    CentralMemoryManager mgr;
-    mgr.Initialize();
-
-    RawChunk a = mgr.AcquireChunk();
-    CHECK(a.Valid());
-    CHECK(a.size == CentralMemoryManager::kChunkSize);
-    TouchMemory(a.base, a.size);
-
-    RawChunk b = mgr.AcquireChunk();
-    CHECK(b.Valid());
-    CHECK(a.base != b.base);
-
-    mgr.ReleaseChunk(a);
-    // Releasing pools the chunk; the next acquire should hand it straight back.
-    RawChunk c = mgr.AcquireChunk();
-    CHECK(c.base == a.base);
-
-    mgr.ReleaseChunk(b);
-    mgr.ReleaseChunk(c);
-    mgr.Shutdown();
-}
-
-// -----------------------------------------------------------------------------
-// Test 3 / case 1: 32-thread random alloc/free stress
 // -----------------------------------------------------------------------------
 void TestConcurrencyStress() {
-    Section("Test 3.1: 32-thread random alloc/free stress");
-    CentralMemoryManager mgr;
-    mgr.Initialize();
-
+    Section("Test 5: 32-thread random alloc/free stress (rpmalloc)");
     constexpr int kThreads = 32;
     constexpr int kIterations = 10000;
-    std::atomic<int> badPointers{0};
+    std::atomic<int> bad{0};
 
-    auto worker = [&mgr, &badPointers](unsigned seed) {
+    auto worker = [&bad](unsigned seed) {
         std::mt19937 rng(seed);
         std::uniform_int_distribution<std::size_t> sizeDist(1, 8192);
         std::uniform_int_distribution<int> alignPow(0, 6); // 1..64
 
         std::vector<std::pair<void*, std::size_t>> live;
         live.reserve(64);
-
         for (int i = 0; i < kIterations; ++i) {
-            const bool doFree = !live.empty() && (rng() & 1);
-            if (doFree) {
+            if (!live.empty() && (rng() & 1)) {
                 auto idx = rng() % live.size();
-                mgr.Free(live[idx].first);
+                Engine::Free(live[idx].first);
                 live[idx] = live.back();
                 live.pop_back();
             } else {
                 const std::size_t size = sizeDist(rng);
                 const std::size_t align = std::size_t{1} << alignPow(rng);
-                void* p = mgr.Allocate(size, align);
+                void* p = Engine::Allocate(size, align);
                 if (p == nullptr || !IsAligned(p, align)) {
-                    badPointers.fetch_add(1, std::memory_order_relaxed);
+                    bad.fetch_add(1, std::memory_order_relaxed);
                     continue;
                 }
-                // Write a thread-unique pattern to detect overlap/corruption.
                 std::memset(p, static_cast<int>(seed & 0xFF), size);
                 live.emplace_back(p, size);
             }
         }
-        for (auto& entry : live) mgr.Free(entry.first);
+        for (auto& e : live) Engine::Free(e.first);
+        Engine::FlushThreadCache();
     };
 
     std::vector<std::thread> threads;
     threads.reserve(kThreads);
-    for (int t = 0; t < kThreads; ++t) {
-        threads.emplace_back(worker, static_cast<unsigned>(0x1000 + t));
-    }
+    for (int t = 0; t < kThreads; ++t) threads.emplace_back(worker, 0x1000u + t);
     for (auto& th : threads) th.join();
 
-    CHECK(badPointers.load() == 0);
-
-    const auto stats = mgr.GetStats();
-    std::printf("  stats: blockChunks=%zu largeBlocks=%zu reserved=%zu bytes\n",
-                stats.blockChunks, stats.largeBlocks, stats.bytesReserved);
-
-    mgr.Shutdown();
+    CHECK(bad.load() == 0);
+    const auto stats = Engine::QueryMemoryStats();
+    std::printf("  stats: mapped=%zu cached=%zu huge=%zu\n",
+                stats.bytesMapped, stats.bytesCached, stats.bytesHugeAlloc);
 }
 
 // -----------------------------------------------------------------------------
-// Test 3 / case 2: cross-thread free (allocate in A, free in B)
-// -----------------------------------------------------------------------------
 void TestCrossThreadFree() {
-    Section("Test 3.2: cross-thread free");
-    CentralMemoryManager mgr;
-    mgr.Initialize();
-
-    constexpr int kCount = 4096;
+    Section("Test 6: cross-thread free (allocate in A, free in B)");
+    constexpr int kCount = 8192;
     std::vector<void*> handoff(kCount, nullptr);
-    std::atomic<int> mismatches{0};
+    std::atomic<int> bad{0};
 
     std::thread producer([&] {
         for (int i = 0; i < kCount; ++i) {
-            void* p = mgr.Allocate(128, 64);
-            if (p == nullptr || !IsAligned(p, 64)) {
-                mismatches.fetch_add(1, std::memory_order_relaxed);
-            }
+            void* p = Engine::Allocate(200, 64);
+            if (p == nullptr || !IsAligned(p, 64)) bad.fetch_add(1, std::memory_order_relaxed);
             handoff[i] = p;
         }
     });
-    producer.join(); // establish a clean happens-before for the handoff buffer
+    producer.join();
 
     std::thread consumer([&] {
         for (int i = 0; i < kCount; ++i) {
-            if (handoff[i]) mgr.Free(handoff[i]);
+            if (handoff[i]) Engine::Free(handoff[i]);
         }
     });
     consumer.join();
 
-    CHECK(mismatches.load() == 0);
-    mgr.Shutdown();
+    CHECK(bad.load() == 0);
+}
+
+// -----------------------------------------------------------------------------
+void TestPoolManager() {
+    Section("Test 7: PoolHandle manager (multiple sizes)");
+    CoreInitGame();
+    HostServices* hs = CoreGetHostServices();
+    CHECK(hs != nullptr);
+
+    PoolHandle particlePool = hs->CreatePool(32, 256);
+    PoolHandle transformPool = hs->CreatePool(64, 128);
+    PoolHandle statePool = hs->CreatePool(128, 64);
+    CHECK(particlePool != nullptr);
+    CHECK(transformPool != nullptr);
+    CHECK(statePool != nullptr);
+
+    void* p32 = hs->AllocPool(particlePool);
+    void* p64 = hs->AllocPool(transformPool);
+    void* p128 = hs->AllocPool(statePool);
+    CHECK(p32 != nullptr && p64 != nullptr && p128 != nullptr);
+
+    hs->FreePool(particlePool, p32);
+    hs->FreePool(transformPool, p64);
+    hs->FreePool(statePool, p128);
+
+    hs->DestroyPool(particlePool);
+    hs->DestroyPool(transformPool);
+    hs->DestroyPool(statePool);
+    CHECK(hs->AllocPool(particlePool) == nullptr);
+
+    CoreShutdown();
+}
+
+// -----------------------------------------------------------------------------
+void TestHostServicesBindings() {
+    Section("Test 8: HostServices typed API (heap / frame / gpu / pool)");
+    CoreInitGame();
+    HostServices* hs = CoreGetHostServices();
+    CHECK(hs != nullptr);
+
+    void* heap = hs->AllocHeap(256, 64);
+    CHECK(heap != nullptr);
+    CHECK(IsAligned(heap, 64));
+    hs->FreeHeap(heap);
+
+    void* frame = hs->AllocFrame(128, 16);
+    CHECK(frame != nullptr);
+    CHECK(IsAligned(frame, 16));
+    hs->ResetFrameArenas();
+    void* frameAfterReset = hs->AllocFrame(64, 64);
+    CHECK(frameAfterReset != nullptr);
+    CHECK(IsAligned(frameAfterReset, 64));
+
+    void* gpu = hs->AllocGpu(500, 256);
+    CHECK(gpu != nullptr);
+    CHECK(IsAligned(gpu, 256));
+
+    PoolHandle pool = hs->CreatePool(48, 4);
+    CHECK(pool != nullptr);
+    void* slot = hs->AllocPool(pool);
+    CHECK(slot != nullptr);
+    hs->FreePool(pool, slot);
+    hs->DestroyPool(pool);
+
+    CoreShutdown();
 }
 
 } // namespace
 
 int main() {
-    std::printf("EngineVirtualMemory / CentralMemoryManager test suite\n");
+    std::printf("Engine allocator (rpmalloc + arenas + pool) test suite\n");
 
-    TestPhase1();
-    TestAlignmentAndBoundary();
-    TestRawChunks();
+    TestFrameArena();
+    TestGpuArena();
+    TestObjectPool();
+    TestEngineAllocate();
     TestConcurrencyStress();
     TestCrossThreadFree();
+    TestPoolManager();
+    TestHostServicesBindings();
 
     const int checks = g_checks.load();
     const int failures = g_failures.load();
