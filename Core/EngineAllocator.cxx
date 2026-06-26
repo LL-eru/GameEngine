@@ -1,5 +1,6 @@
 #include "Public/EngineAllocator.hxx"
 #include "Public/EngineVirtualMemory.hxx"
+#include "Public/ThreadPool.hxx"
 
 #include "rpmalloc.h"
 
@@ -46,6 +47,10 @@ void* EngineAllocator::AllocFrame(size_t size, size_t alignment) {
     ENGINE_VM_VERIFY(IsPowerOfTwo(alignment),
                      "EngineAllocator::AllocFrame alignment must be a power of two");
     if (!IsPowerOfTwo(alignment)) return nullptr;
+
+    if (FrameArena* worker_arena = Engine::ThreadPool::CurrentWorkerFrameArena()) {
+        return worker_arena->Allocate(size, alignment);
+    }
     return s_frameArena ? s_frameArena->Allocate(size, alignment) : nullptr;
 }
 
@@ -54,12 +59,17 @@ void* EngineAllocator::AllocGpu(size_t size, size_t alignment) {
     ENGINE_VM_VERIFY(IsPowerOfTwo(alignment),
                      "EngineAllocator::AllocGpu alignment must be a power of two");
     if (!IsPowerOfTwo(alignment)) return nullptr;
+
+    if (GPUArena* worker_arena = Engine::ThreadPool::CurrentWorkerGpuArena()) {
+        return worker_arena->Allocate(size, alignment);
+    }
     return s_gpuArena ? s_gpuArena->Allocate(size, alignment) : nullptr;
 }
 
 void EngineAllocator::ResetFrameArenas() {
     if (s_frameArena) s_frameArena->Reset();
     if (s_gpuArena) s_gpuArena->Reset();
+    Engine::ThreadPool::ResetAllWorkerFrameArenas();
 }
 
 bool EngineAllocator::IsLivePool(PoolHandle pool) {

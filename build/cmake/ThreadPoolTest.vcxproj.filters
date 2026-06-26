@@ -7,7 +7,19 @@
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\ThreadPool.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\EngineAllocator.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\EngineArenas.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\MemoryAPI.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\WorkerRenderContext.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\third_party\rpmalloc\rpmalloc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

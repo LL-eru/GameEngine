@@ -75,76 +75,89 @@ add_executable(EngineApiTest Tests/EngineApiTest.cxx)
 target_link_libraries(EngineApiTest PRIVATE Core CrossModulePlugin)
 add_test(NAME EngineApiTest COMMAND EngineApiTest)
 
-add_executable(ThreadPoolTest Tests/ThreadPoolTest.cxx Core/ThreadPool.cxx Core/WorkerRenderContext.cxx)
-target_include_directories(ThreadPoolTest
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+# ThreadPool now depends on EngineAllocator / MemoryAPI (task pools, worker arenas).
+set(THREAD_POOL_SUPPORT_SOURCES
+    Core/ThreadPool.cxx
+    Core/EngineAllocator.cxx
+    Core/EngineArenas.cxx
+    Core/MemoryAPI.cxx
+    Core/WorkerRenderContext.cxx
+    third_party/rpmalloc/rpmalloc.c
 )
-target_compile_definitions(ThreadPoolTest
-    PRIVATE
-        GE_BUILD_CORE
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-)
+
+function(configure_standalone_thread_pool_test target)
+    target_include_directories(${target}
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
+            ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rpmalloc
+    )
+    target_compile_definitions(${target}
+        PRIVATE
+            GE_BUILD_CORE
+            WIN32_LEAN_AND_MEAN
+            NOMINMAX
+    )
+    set_source_files_properties(third_party/rpmalloc/rpmalloc.c PROPERTIES
+        COMPILE_DEFINITIONS "ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS"
+    )
+endfunction()
+
+add_executable(ThreadPoolTest Tests/ThreadPoolTest.cxx ${THREAD_POOL_SUPPORT_SOURCES})
+configure_standalone_thread_pool_test(ThreadPoolTest)
 add_test(NAME ThreadPoolTest COMMAND ThreadPoolTest)
 
 add_executable(TaskTest
     Tests/TaskTest.cxx
-    Core/ThreadPool.cxx
     Core/CoroutineFrameAllocator.cxx
-    Core/WorkerRenderContext.cxx
+    ${THREAD_POOL_SUPPORT_SOURCES}
 )
-target_include_directories(TaskTest
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
-)
-target_compile_definitions(TaskTest
-    PRIVATE
-        GE_BUILD_CORE
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-)
+configure_standalone_thread_pool_test(TaskTest)
 add_test(NAME TaskTest COMMAND TaskTest)
 
 add_executable(SenderTest
     Tests/SenderTest.cxx
-    Core/ThreadPool.cxx
     Core/CoroutineFrameAllocator.cxx
-    Core/WorkerRenderContext.cxx
+    ${THREAD_POOL_SUPPORT_SOURCES}
 )
-target_include_directories(SenderTest
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
-)
-target_compile_definitions(SenderTest
-    PRIVATE
-        GE_BUILD_CORE
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-)
+configure_standalone_thread_pool_test(SenderTest)
 add_test(NAME SenderTest COMMAND SenderTest)
 
 add_executable(ContextTest
     Tests/ContextTest.cxx
-    Core/ThreadPool.cxx
     Core/CoroutineFrameAllocator.cxx
-    Core/WorkerRenderContext.cxx
+    ${THREAD_POOL_SUPPORT_SOURCES}
 )
-target_include_directories(ContextTest
+configure_standalone_thread_pool_test(ContextTest)
+add_test(NAME ContextTest COMMAND ContextTest)
+
+add_executable(TaskMemoryTest
+    Tests/TaskMemoryTest.cxx
+    Core/CoroutineFrameAllocator.cxx
+    ${THREAD_POOL_SUPPORT_SOURCES}
+)
+target_include_directories(TaskMemoryTest
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rpmalloc
 )
-target_compile_definitions(ContextTest
+target_compile_definitions(TaskMemoryTest
     PRIVATE
         GE_BUILD_CORE
+        ENGINE_TEST_HOOKS
         WIN32_LEAN_AND_MEAN
         NOMINMAX
 )
-add_test(NAME ContextTest COMMAND ContextTest)
+set_source_files_properties(third_party/rpmalloc/rpmalloc.c PROPERTIES
+    COMPILE_DEFINITIONS "ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS"
+)
+if (MSVC)
+    set_target_properties(TaskMemoryTest PROPERTIES
+        LINK_FLAGS "/FORCE:MULTIPLE /IGNORE:4006 /IGNORE:4088"
+    )
+endif()
+add_test(NAME TaskMemoryTest COMMAND TaskMemoryTest)
 
 # Also link ThreadPool into Core.dll for engine use.
 # ThreadPoolTest compiles ThreadPool.cxx directly to avoid DLL boundary issues in tests.

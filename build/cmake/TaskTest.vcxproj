@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -105,10 +105,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -131,7 +131,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -151,10 +151,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -177,7 +177,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -197,10 +197,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -223,7 +223,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -242,10 +242,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GE_BUILD_CORE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyPrograms\GameEngine\Core\Public;C:\MyPrograms\GameEngine\Interface;C:\MyPrograms\GameEngine\third_party\rpmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -325,9 +325,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\MyPrograms\GameEngine\Tests\TaskTest.cxx" />
-    <ClCompile Include="C:\MyPrograms\GameEngine\Core\ThreadPool.cxx" />
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\CoroutineFrameAllocator.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\ThreadPool.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\EngineAllocator.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\EngineArenas.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\MemoryAPI.cxx" />
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\WorkerRenderContext.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\third_party\rpmalloc\rpmalloc.c">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=0;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=0;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

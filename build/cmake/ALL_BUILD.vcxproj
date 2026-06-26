@@ -198,6 +198,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{9ECC98CF-6A22-35A4-9EF7-BF3C825F0D06}</Project>
       <Name>SenderTest</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\MyPrograms\GameEngine\build\cmake\TaskMemoryTest.vcxproj">
+      <Project>{F3AFD327-6B97-3C87-874A-D0C45D821CD4}</Project>
+      <Name>TaskMemoryTest</Name>
+    </ProjectReference>
     <ProjectReference Include="C:\MyPrograms\GameEngine\build\cmake\TaskTest.vcxproj">
       <Project>{08628A70-D970-333A-B9A0-586343D4CF3E}</Project>
       <Name>TaskTest</Name>
