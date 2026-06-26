@@ -6,11 +6,11 @@
 #include "Public/TestDiagnostics.hxx"
 #include "../../Interface/MemoryAPI.hxx"
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <coroutine>
+#include <cstring>
 #include <deque>
 #include <memory>
 #include <mutex>
@@ -24,15 +24,24 @@ constexpr std::size_t kInvalidWorkerIndex = static_cast<std::size_t>(-1);
 constexpr std::size_t kQueueCapacity = 4096;
 constexpr std::size_t kPinnedCapacity = 256;
 
+constexpr std::uint32_t kPoolType32 = 0;
+constexpr std::uint32_t kPoolType256 = 1;
+constexpr std::uint32_t kPoolTypeHeap = 2;
+
 thread_local std::size_t tls_worker_index = kInvalidWorkerIndex;
-thread_local ThreadPool* tls_current_pool = nullptr;
+thread_local FrameArena* tls_worker_frame_arena = nullptr;
+thread_local GPUArena*   tls_worker_gpu_arena = nullptr;
+
+struct TaskHeader {
+    void (*invoker)(void*) = nullptr;
+    void (*destructor)(void*) = nullptr;
+    std::uint32_t pool_type = kPoolTypeHeap;
+    std::uint32_t payload_size = 0;
+};
 
 PoolHandle s_task_pool_32 = nullptr;
 PoolHandle s_task_pool_256 = nullptr;
 std::mutex s_pool_mutex;
-
-std::mutex g_registered_pools_mutex;
-std::vector<ThreadPool*> g_registered_pools;
 
 void RunTask(Job& job) {
     job();
@@ -45,101 +54,60 @@ void ResumeCoroutineHandle(void* ctx) {
     }
 }
 
+void* TaskPayload(void* block) {
+    return static_cast<char*>(block) + sizeof(TaskHeader);
+}
+
+void ExecutePooledTask(void* ctx) {
+    auto* header = static_cast<TaskHeader*>(ctx);
+    header->invoker(TaskPayload(ctx));
+
+    std::lock_guard lock(s_pool_mutex);
+    if (header->pool_type == kPoolType32) {
+        EngineAllocator::FreePool(s_task_pool_32, ctx);
+    } else if (header->pool_type == kPoolType256) {
+        EngineAllocator::FreePool(s_task_pool_256, ctx);
+    } else {
+        EngineAllocator::FreeHeap(ctx);
+    }
+}
+
+void ExecuteFallbackTask(void* ctx) {
+    auto* header = static_cast<TaskHeader*>(ctx);
+    void* payload = TaskPayload(ctx);
+    header->invoker(payload);
+    if (header->destructor) {
+        header->destructor(payload);
+    }
+    EngineAllocator::FreeHeap(ctx);
+}
+
 void InitializeTaskPools() {
     std::lock_guard lock(s_pool_mutex);
     if (!s_task_pool_32) {
-        s_task_pool_32 = EngineAllocator::CreatePool(32, 1024);
-        s_task_pool_256 = EngineAllocator::CreatePool(256, 128);
+        s_task_pool_32 = EngineAllocator::CreatePool(sizeof(TaskHeader) + 32, 1024);
+        s_task_pool_256 = EngineAllocator::CreatePool(sizeof(TaskHeader) + 256, 128);
     }
 }
 
-void RegisterPool(ThreadPool* pool) {
-    std::lock_guard lock(g_registered_pools_mutex);
-    g_registered_pools.push_back(pool);
-}
-
-void UnregisterPool(ThreadPool* pool) {
-    std::lock_guard lock(g_registered_pools_mutex);
-    const auto it = std::find(g_registered_pools.begin(), g_registered_pools.end(), pool);
-    if (it != g_registered_pools.end()) {
-        g_registered_pools.erase(it);
+std::size_t PoolFreeCount(PoolHandle pool) {
+    std::lock_guard lock(s_pool_mutex);
+    if (!pool) {
+        return 0;
     }
+    return pool->pool.GetFreeCount();
 }
 
 } // namespace
 
 namespace detail {
 
-void* AllocTaskStorage32(bool* heap_fallback) noexcept {
-    InitializeTaskPools();
-    *heap_fallback = false;
-
-    void* ctx_mem = nullptr;
-    {
-        std::lock_guard lock(s_pool_mutex);
-        ctx_mem = EngineAllocator::AllocPool(s_task_pool_32);
-    }
-    if (!ctx_mem) {
-        ctx_mem = EngineAllocator::AllocHeap(32, alignof(std::max_align_t));
-        *heap_fallback = ctx_mem != nullptr;
-    }
-    return ctx_mem;
-}
-
-void FreeTaskStorage32(void* ptr, bool heap_fallback) noexcept {
-    if (!ptr) {
-        return;
-    }
-    if (heap_fallback) {
-        EngineAllocator::FreeHeap(ptr);
-        return;
-    }
-    std::lock_guard lock(s_pool_mutex);
-    EngineAllocator::FreePool(s_task_pool_32, ptr);
-}
-
-void* AllocTaskStorage256(bool* heap_fallback) noexcept {
-    InitializeTaskPools();
-    *heap_fallback = false;
-
-    void* ctx_mem = nullptr;
-    {
-        std::lock_guard lock(s_pool_mutex);
-        ctx_mem = EngineAllocator::AllocPool(s_task_pool_256);
-    }
-    if (!ctx_mem) {
-        ctx_mem = EngineAllocator::AllocHeap(256, alignof(std::max_align_t));
-        *heap_fallback = ctx_mem != nullptr;
-    }
-    return ctx_mem;
-}
-
-void FreeTaskStorage256(void* ptr, bool heap_fallback) noexcept {
-    if (!ptr) {
-        return;
-    }
-    if (heap_fallback) {
-        EngineAllocator::FreeHeap(ptr);
-        return;
-    }
-    std::lock_guard lock(s_pool_mutex);
-    EngineAllocator::FreePool(s_task_pool_256, ptr);
-}
-
 std::size_t GetTaskPool32FreeCount() noexcept {
-    std::lock_guard lock(s_pool_mutex);
-    if (!s_task_pool_32) {
-        return 0;
-    }
-    return s_task_pool_32->pool.GetFreeCount();
+    return PoolFreeCount(s_task_pool_32);
 }
 
 std::size_t GetTaskPool256FreeCount() noexcept {
-    std::lock_guard lock(s_pool_mutex);
-    if (!s_task_pool_256) {
-        return 0;
-    }
-    return s_task_pool_256->pool.GetFreeCount();
+    return PoolFreeCount(s_task_pool_256);
 }
 
 } // namespace detail
@@ -160,8 +128,6 @@ struct ThreadPool::Impl {
         std::thread::id thread_id{};
     };
 
-    ThreadPool* owner = nullptr;
-
     std::vector<std::unique_ptr<Worker>> workers;
     std::atomic<std::size_t> next_submit{0};
     std::atomic<std::size_t> pending{0};
@@ -174,7 +140,9 @@ struct ThreadPool::Impl {
     std::condition_variable wait_cv;
     std::condition_variable worker_cv;
 
-    explicit Impl(std::size_t worker_count, ThreadPool* owner_pool) : owner(owner_pool) {
+    static Impl* s_active_impl;
+
+    explicit Impl(std::size_t worker_count) {
         if (worker_count == 0) {
             worker_count = std::thread::hardware_concurrency();
         }
@@ -182,13 +150,15 @@ struct ThreadPool::Impl {
             worker_count = 1;
         }
 
-        AllocatorConfig config{};
+        InitializeTaskPools();
+        s_active_impl = this;
+
         workers.reserve(worker_count);
         running.store(true, std::memory_order_release);
         for (std::size_t i = 0; i < worker_count; ++i) {
             auto worker = std::make_unique<Worker>();
-            worker->local_frame_arena.Initialize(config.frameArenaCapacityBytes);
-            worker->local_gpu_arena.Initialize(config.gpuArenaCapacityBytes);
+            worker->local_frame_arena.Initialize(16 * 1024 * 1024);
+            worker->local_gpu_arena.Initialize(64 * 1024 * 1024);
             worker->thread = std::thread([this, i] { WorkerLoop(i); });
             workers.push_back(std::move(worker));
         }
@@ -198,11 +168,19 @@ struct ThreadPool::Impl {
         if (running.load(std::memory_order_acquire)) {
             Shutdown(true);
         }
+        for (const auto& worker : workers) {
+            worker->local_gpu_arena.Shutdown();
+            worker->local_frame_arena.Shutdown();
+        }
+        if (s_active_impl == this) {
+            s_active_impl = nullptr;
+        }
     }
 
     void WorkerLoop(std::size_t index) {
         tls_worker_index = index;
-        tls_current_pool = owner;
+        tls_worker_frame_arena = &workers[index]->local_frame_arena;
+        tls_worker_gpu_arena = &workers[index]->local_gpu_arena;
         workers[index]->thread_id = std::this_thread::get_id();
 
         WorkerRenderContext render_context(index);
@@ -246,8 +224,9 @@ struct ThreadPool::Impl {
         }
 
         BindWorkerRenderContext(nullptr);
+        tls_worker_gpu_arena = nullptr;
+        tls_worker_frame_arena = nullptr;
         tls_worker_index = kInvalidWorkerIndex;
-        tls_current_pool = nullptr;
     }
 
     bool TryPopInbound(Worker& worker, Job& out_job, bool pinned) {
@@ -373,13 +352,6 @@ struct ThreadPool::Impl {
         }
     }
 
-    void ResetWorkerFrameArenas() {
-        for (const auto& worker : workers) {
-            worker->local_frame_arena.Reset();
-            worker->local_gpu_arena.Reset();
-        }
-    }
-
     void Shutdown(bool drain_pending) {
         if (!running.exchange(false, std::memory_order_acq_rel)) {
             return;
@@ -396,20 +368,83 @@ struct ThreadPool::Impl {
             if (worker->thread.joinable()) {
                 worker->thread.join();
             }
-            worker->local_frame_arena.Shutdown();
-            worker->local_gpu_arena.Shutdown();
         }
     }
 };
 
+ThreadPool::Impl* ThreadPool::Impl::s_active_impl = nullptr;
+
 ThreadPool::ThreadPool(std::size_t worker_count)
-    : impl_(new Impl(worker_count, this)) {
-    RegisterPool(this);
-}
+    : impl_(new Impl(worker_count)) {}
 
 ThreadPool::~ThreadPool() {
-    UnregisterPool(this);
     delete impl_;
+}
+
+void ThreadPool::SubmitInternal(
+    void* src_callable,
+    void (*invoker)(void*),
+    void (*constructor)(void*, void*),
+    std::size_t lambda_size,
+    TaskOptions options) {
+    if (!impl_->running.load(std::memory_order_acquire)) {
+        return;
+    }
+
+    InitializeTaskPools();
+
+    PoolHandle pool = (lambda_size <= 32) ? s_task_pool_32 : s_task_pool_256;
+    std::uint32_t pool_type = (lambda_size <= 32) ? kPoolType32 : kPoolType256;
+
+    void* mem = nullptr;
+    {
+        std::lock_guard lock(s_pool_mutex);
+        mem = EngineAllocator::AllocPool(pool);
+    }
+    if (!mem) {
+        mem = EngineAllocator::AllocHeap(sizeof(TaskHeader) + lambda_size, alignof(std::max_align_t));
+        pool_type = kPoolTypeHeap;
+    }
+    if (!mem) {
+        return;
+    }
+
+    auto* header = static_cast<TaskHeader*>(mem);
+    header->invoker = invoker;
+    header->destructor = nullptr;
+    header->pool_type = pool_type;
+    header->payload_size = static_cast<std::uint32_t>(lambda_size);
+
+    constructor(TaskPayload(mem), src_callable);
+
+    impl_->SubmitJob(Job{ExecutePooledTask, mem}, options);
+}
+
+void ThreadPool::SubmitFallbackInternal(
+    void* src_callable,
+    void (*invoker)(void*),
+    void (*destructor)(void*),
+    void (*constructor)(void*, void*),
+    std::size_t lambda_size,
+    TaskOptions options) {
+    if (!impl_->running.load(std::memory_order_acquire)) {
+        return;
+    }
+
+    void* mem = EngineAllocator::AllocHeap(sizeof(TaskHeader) + lambda_size, alignof(std::max_align_t));
+    if (!mem) {
+        return;
+    }
+
+    auto* header = static_cast<TaskHeader*>(mem);
+    header->invoker = invoker;
+    header->destructor = destructor;
+    header->pool_type = kPoolTypeHeap;
+    header->payload_size = static_cast<std::uint32_t>(lambda_size);
+
+    constructor(TaskPayload(mem), src_callable);
+
+    impl_->SubmitJob(Job{ExecuteFallbackTask, mem}, options);
 }
 
 void ThreadPool::Submit(Job job, TaskOptions options) {
@@ -466,48 +501,35 @@ std::optional<std::size_t> ThreadPool::CurrentWorkerIndex() noexcept {
 }
 
 FrameArena* ThreadPool::CurrentWorkerFrameArena() noexcept {
-    const auto idx = CurrentWorkerIndex();
-    if (!idx.has_value() || tls_current_pool == nullptr) {
-        return nullptr;
-    }
-    auto& workers = tls_current_pool->impl_->workers;
-    if (*idx >= workers.size()) {
-        return nullptr;
-    }
-    return &workers[*idx]->local_frame_arena;
+    return tls_worker_frame_arena;
 }
 
-GPUArena* ThreadPool::CurrentWorkerGpuArena() noexcept {
-    const auto idx = CurrentWorkerIndex();
-    if (!idx.has_value() || tls_current_pool == nullptr) {
-        return nullptr;
+GPUArena* ThreadPool::CurrentWorkerGPUArena() noexcept {
+    return tls_worker_gpu_arena;
+}
+
+void ThreadPool::ResetAllWorkerArenas() noexcept {
+    if (!Impl::s_active_impl) {
+        return;
     }
-    auto& workers = tls_current_pool->impl_->workers;
-    if (*idx >= workers.size()) {
-        return nullptr;
+    for (const auto& worker : Impl::s_active_impl->workers) {
+        worker->local_frame_arena.Reset();
+        worker->local_gpu_arena.Reset();
     }
-    return &workers[*idx]->local_gpu_arena;
 }
 
 void ThreadPool::IncrementFlushGeneration() noexcept {
-    impl_->global_flush_generation.fetch_add(1, std::memory_order_release);
+    if (!Impl::s_active_impl) {
+        return;
+    }
+    Impl::s_active_impl->global_flush_generation.fetch_add(1, std::memory_order_release);
 }
 
 std::uint64_t ThreadPool::GlobalFlushGeneration() noexcept {
-    std::lock_guard lock(g_registered_pools_mutex);
-    if (g_registered_pools.empty()) {
+    if (!Impl::s_active_impl) {
         return 0;
     }
-    return g_registered_pools.front()->impl_->global_flush_generation.load(std::memory_order_acquire);
-}
-
-void ThreadPool::ResetAllWorkerFrameArenas() noexcept {
-    std::lock_guard lock(g_registered_pools_mutex);
-    for (ThreadPool* pool : g_registered_pools) {
-        if (pool != nullptr && pool->impl_ != nullptr) {
-            pool->impl_->ResetWorkerFrameArenas();
-        }
-    }
+    return Impl::s_active_impl->global_flush_generation.load(std::memory_order_acquire);
 }
 
 void ThreadPool::ResumeCoroutine(std::coroutine_handle<> handle, TaskOptions options) {

@@ -94,7 +94,6 @@ void TestPoolExhaustionFallback(Engine::ThreadPool& pool) {
         pool.Submit([&counter]() { counter.fetch_add(1, std::memory_order_relaxed); });
     }
     pool.WaitIdle();
-    pool.WaitIdle();
     CHECK(counter.load() == kTasks);
 
     const std::size_t after_free = Engine::detail::GetTaskPool32FreeCount();
@@ -111,10 +110,9 @@ void TestFallbackForOversizedCapture(Engine::ThreadPool& pool) {
     static_assert(sizeof(HugeCapture512) > 256);
 
     std::atomic<bool> executed{false};
-    pool.Submit([ &executed ]() {
-        HugeCapture512 capture{};
-        capture.payload.back() = 0xCD;
-        executed.store(true, std::memory_order_release);
+    const HugeCapture512 seed{};
+    pool.Submit([ capture = seed, &executed ]() {
+        executed.store(capture.payload.back() == 0, std::memory_order_release);
     });
     pool.WaitIdle();
     CHECK(executed.load(std::memory_order_acquire));
@@ -229,7 +227,6 @@ void TestCoroutineSurvivesFrameResets(
     for (int frame = 0; frame < 4; ++frame) {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         EngineAllocator::ResetFrameArenas();
-        pool.IncrementFlushGeneration();
 
         pool.Submit([]() { (void)EngineAllocator::AllocFrame(256, 16); });
     }
@@ -250,7 +247,7 @@ void TestJitterFlushSuppression(Engine::ThreadPool& pool, std::size_t worker_cou
     constexpr int kFrames = 60;
     for (int frame = 0; frame < kFrames; ++frame) {
         pool.Submit([]() {});
-        pool.IncrementFlushGeneration();
+        Engine::ThreadPool::IncrementFlushGeneration();
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
 
@@ -289,7 +286,7 @@ void TestThreadCacheReclamation(Engine::ThreadPool& pool) {
     pool.WaitIdle();
     CHECK(completed.load() == kWorkers);
 
-    pool.IncrementFlushGeneration();
+    Engine::ThreadPool::IncrementFlushGeneration();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     const auto stats_after = Engine::QueryMemoryStats();
@@ -300,6 +297,80 @@ void TestThreadCacheReclamation(Engine::ThreadPool& pool) {
                 stats_after.bytesCached);
 
     CHECK(stats_after.bytesMapped <= stats_before.bytesMapped + kChunkBytes);
+}
+
+// -----------------------------------------------------------------------------
+// IT-3: Async asset load with heap lifetime across frame arena resets
+// -----------------------------------------------------------------------------
+
+Engine::Task<std::vector<std::uint8_t>> AsyncAssetLoadSimulation(Engine::ThreadPoolScheduler scheduler) {
+    co_await Engine::switch_to(scheduler);
+
+    auto* long_lived_data = static_cast<std::uint32_t*>(EngineAllocator::AllocHeap(1024, alignof(std::uint32_t)));
+    long_lived_data[0] = 0xDEADBEEFU;
+
+    co_await PoolYieldAwaiter{scheduler.GetPool()};
+
+    CHECK(long_lived_data[0] == 0xDEADBEEFU);
+
+    auto* scratch = static_cast<char*>(EngineAllocator::AllocFrame(256, 16));
+    CHECK(scratch != nullptr);
+    if (scratch != nullptr) {
+        std::strcpy(scratch, "Done");
+        CHECK(scratch[0] == 'D');
+    }
+
+    std::vector<std::uint8_t> result(4, 0xFF);
+    EngineAllocator::FreeHeap(long_lived_data);
+    co_return result;
+}
+
+void TestAsyncAssetLoadIntegration(Engine::ThreadPool& pool, Engine::ThreadPoolScheduler scheduler) {
+    Section("IT-3: heap load data survives ResetFrameArenas across frames");
+
+    auto task = AsyncAssetLoadSimulation(scheduler);
+    task.Start();
+
+    for (int frame = 0; frame < 5; ++frame) {
+        for (int t = 0; t < 100; ++t) {
+            pool.Submit([]() { (void)EngineAllocator::AllocFrame(64, 16); });
+        }
+        pool.WaitIdle();
+        EngineAllocator::ResetFrameArenas();
+    }
+
+    pool.WaitIdle();
+    const auto& result = task.Result();
+    CHECK(result.size() == 4);
+    CHECK(result[0] == 0xFF);
+}
+
+// -----------------------------------------------------------------------------
+// PT-2: Ten thousand submits should not grow global heap stats
+// -----------------------------------------------------------------------------
+
+void TestSubmitDoesNotGrowHeapStats(Engine::ThreadPool& pool) {
+    Section("PT-2: 10k Submit calls reuse task pools without heap growth");
+
+    const auto stats_before = Engine::QueryMemoryStats();
+
+    std::atomic<int> counter{0};
+    for (int i = 0; i < 10000; ++i) {
+        pool.Submit([&counter]() { counter.fetch_add(1, std::memory_order_relaxed); });
+    }
+    pool.WaitIdle();
+    CHECK(counter.load() == 10000);
+
+    const auto stats_after = Engine::QueryMemoryStats();
+    std::printf("  mapped before=%zu after=%zu huge before=%zu after=%zu\n",
+                stats_before.bytesMapped,
+                stats_after.bytesMapped,
+                stats_before.bytesHugeAlloc,
+                stats_after.bytesHugeAlloc);
+
+    CHECK(stats_after.bytesMapped <= stats_before.bytesMapped + 64 * 1024);
+    CHECK(stats_after.bytesHugeAlloc <= stats_before.bytesHugeAlloc + 64 * 1024);
+    CHECK(Engine::detail::GetTaskPool32FreeCount() == kTaskPool32Capacity);
 }
 
 } // namespace
@@ -323,9 +394,11 @@ int main() {
     TestResetAllWorkerFrameArenas(pool, worker_count);
 
     TestCoroutineSurvivesFrameResets(pool, scheduler);
+    TestAsyncAssetLoadIntegration(pool, scheduler);
     TestJitterFlushSuppression(pool, worker_count);
 
     TestThreadCacheReclamation(pool);
+    TestSubmitDoesNotGrowHeapStats(pool);
 
     pool.Shutdown();
     EngineAllocator::Shutdown();

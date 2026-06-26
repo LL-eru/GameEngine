@@ -60,16 +60,18 @@ void* EngineAllocator::AllocGpu(size_t size, size_t alignment) {
                      "EngineAllocator::AllocGpu alignment must be a power of two");
     if (!IsPowerOfTwo(alignment)) return nullptr;
 
-    if (GPUArena* worker_arena = Engine::ThreadPool::CurrentWorkerGpuArena()) {
+    if (GPUArena* worker_arena = Engine::ThreadPool::CurrentWorkerGPUArena()) {
         return worker_arena->Allocate(size, alignment);
     }
     return s_gpuArena ? s_gpuArena->Allocate(size, alignment) : nullptr;
 }
 
 void EngineAllocator::ResetFrameArenas() {
+    Engine::ThreadPool::IncrementFlushGeneration();
+
     if (s_frameArena) s_frameArena->Reset();
     if (s_gpuArena) s_gpuArena->Reset();
-    Engine::ThreadPool::ResetAllWorkerFrameArenas();
+    Engine::ThreadPool::ResetAllWorkerArenas();
 }
 
 bool EngineAllocator::IsLivePool(PoolHandle pool) {
