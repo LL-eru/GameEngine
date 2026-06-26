@@ -22,6 +22,15 @@
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\RpmallocNew.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\ThreadPool.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\CoroutineFrameAllocator.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\WorkerRenderContext.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\MyPrograms\GameEngine\third_party\rpmalloc\rpmalloc.c">
       <Filter>Source Files</Filter>
     </ClCompile>

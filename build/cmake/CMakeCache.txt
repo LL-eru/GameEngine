@@ -185,6 +185,9 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Enable Thread Sanitizer for tests
+ENABLE_TSAN:BOOL=OFF
+
 //Value Computed by CMake
 GameEngine_BINARY_DIR:STATIC=C:/MyPrograms/GameEngine/build/cmake
 

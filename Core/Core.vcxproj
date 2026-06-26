@@ -142,6 +142,9 @@
     <ClCompile Include="Logger.cxx" />
     <ClCompile Include="MemoryAPI.cxx" />
     <ClCompile Include="RpmallocNew.cxx" />
+    <ClCompile Include="ThreadPool.cxx" />
+    <ClCompile Include="CoroutineFrameAllocator.cxx" />
+    <ClCompile Include="WorkerRenderContext.cxx" />
     <ClCompile Include="..\third_party\rpmalloc\rpmalloc.c">
       <CompileAs>CompileAsC</CompileAs>
       <ConformanceMode>false</ConformanceMode>
@@ -167,6 +170,11 @@
     <ClInclude Include="Public\EnginePlugin.hxx" />
     <ClInclude Include="Public\HostContext.hxx" />
     <ClInclude Include="Public\Logger.hxx" />
+    <ClInclude Include="Public\ThreadPool.hxx" />
+    <ClInclude Include="Public\CoroutineFrameAllocator.hxx" />
+    <ClInclude Include="Public\WorkerRenderContext.hxx" />
+    <ClInclude Include="Public\WorkerContextAccess.hxx" />
+    <ClInclude Include="Public\WorkStealingDeque.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,10 @@ C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/Core.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/MemoryTest.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/CrossModulePlugin.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/EngineApiTest.dir
+C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/ThreadPoolTest.dir
+C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/TaskTest.dir
+C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/SenderTest.dir
+C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/ContextTest.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/RUN_TESTS.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/ALL_BUILD.dir
 C:/MyPrograms/GameEngine/build/cmake/CMakeFiles/ZERO_CHECK.dir

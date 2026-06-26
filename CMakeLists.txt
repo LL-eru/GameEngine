@@ -17,6 +17,9 @@ add_library(Core SHARED
     Core/Logger.cxx
     Core/MemoryAPI.cxx
     Core/RpmallocNew.cxx
+    Core/ThreadPool.cxx
+    Core/CoroutineFrameAllocator.cxx
+    Core/WorkerRenderContext.cxx
     third_party/rpmalloc/rpmalloc.c
 )
 
@@ -71,3 +74,87 @@ target_link_libraries(CrossModulePlugin PRIVATE Core)
 add_executable(EngineApiTest Tests/EngineApiTest.cxx)
 target_link_libraries(EngineApiTest PRIVATE Core CrossModulePlugin)
 add_test(NAME EngineApiTest COMMAND EngineApiTest)
+
+add_executable(ThreadPoolTest Tests/ThreadPoolTest.cxx Core/ThreadPool.cxx Core/WorkerRenderContext.cxx)
+target_include_directories(ThreadPoolTest
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+)
+target_compile_definitions(ThreadPoolTest
+    PRIVATE
+        GE_BUILD_CORE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+add_test(NAME ThreadPoolTest COMMAND ThreadPoolTest)
+
+add_executable(TaskTest
+    Tests/TaskTest.cxx
+    Core/ThreadPool.cxx
+    Core/CoroutineFrameAllocator.cxx
+    Core/WorkerRenderContext.cxx
+)
+target_include_directories(TaskTest
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+)
+target_compile_definitions(TaskTest
+    PRIVATE
+        GE_BUILD_CORE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+add_test(NAME TaskTest COMMAND TaskTest)
+
+add_executable(SenderTest
+    Tests/SenderTest.cxx
+    Core/ThreadPool.cxx
+    Core/CoroutineFrameAllocator.cxx
+    Core/WorkerRenderContext.cxx
+)
+target_include_directories(SenderTest
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+)
+target_compile_definitions(SenderTest
+    PRIVATE
+        GE_BUILD_CORE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+add_test(NAME SenderTest COMMAND SenderTest)
+
+add_executable(ContextTest
+    Tests/ContextTest.cxx
+    Core/ThreadPool.cxx
+    Core/CoroutineFrameAllocator.cxx
+    Core/WorkerRenderContext.cxx
+)
+target_include_directories(ContextTest
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interface
+)
+target_compile_definitions(ContextTest
+    PRIVATE
+        GE_BUILD_CORE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+add_test(NAME ContextTest COMMAND ContextTest)
+
+# Also link ThreadPool into Core.dll for engine use.
+# ThreadPoolTest compiles ThreadPool.cxx directly to avoid DLL boundary issues in tests.
+
+# Optional Thread Sanitizer (Clang/GCC). Example:
+#   cmake -B build/tsan -DENABLE_TSAN=ON .
+#   cmake --build build/tsan --target ThreadPoolTest
+#   ctest --test-dir build/tsan -R ThreadPoolTest
+option(ENABLE_TSAN "Enable Thread Sanitizer for tests" OFF)
+if (ENABLE_TSAN)
+    add_compile_options(-fsanitize=thread -g -O1 -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=thread)
+endif()

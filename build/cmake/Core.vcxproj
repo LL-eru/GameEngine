@@ -340,6 +340,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\Logger.cxx" />
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\MemoryAPI.cxx" />
     <ClCompile Include="C:\MyPrograms\GameEngine\Core\RpmallocNew.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\ThreadPool.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\CoroutineFrameAllocator.cxx" />
+    <ClCompile Include="C:\MyPrograms\GameEngine\Core\WorkerRenderContext.cxx" />
     <ClCompile Include="C:\MyPrograms\GameEngine\third_party\rpmalloc\rpmalloc.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=1;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=1;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions);ENABLE_OVERRIDE=1;ENABLE_PRELOAD=1;BUILD_DYNAMIC_LINK=1;ENABLE_STATISTICS=1;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
